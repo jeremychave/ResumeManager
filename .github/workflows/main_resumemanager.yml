@@ -21,7 +21,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 'aspdotnetv4.x'
+          dotnet-version: 'aspdotnetv4'
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
@@ -62,4 +62,5 @@ jobs:
           app-name: 'ResumeManager'
           slot-name: 'Production'
           package: .
+
           
