@@ -21,7 +21,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 'aspdotnetv4'
+          dotnet-version: 'aspdotnetv4.0'
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
@@ -64,3 +64,4 @@ jobs:
           package: .
 
           
+
