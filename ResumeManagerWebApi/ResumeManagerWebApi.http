@@ -1,0 +1,6 @@
+@ResumeManagerWebApi_HostAddress = http://localhost:5199
+
+GET {{ResumeManagerWebApi_HostAddress}}/products/
+Accept: application/json
+
+###

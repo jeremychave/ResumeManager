@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11520.95 d18.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResumeManagerWebApi", "ResumeManagerWebApi.csproj", "{C5DEC830-0032-B096-F544-578836A93314}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C5DEC830-0032-B096-F544-578836A93314}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5DEC830-0032-B096-F544-578836A93314}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5DEC830-0032-B096-F544-578836A93314}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5DEC830-0032-B096-F544-578836A93314}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5C44C575-0481-4FC2-A7CE-541C33AFDF04}
+	EndGlobalSection
+EndGlobal
