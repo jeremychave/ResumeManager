@@ -1,8 +1,8 @@
 ﻿using ResumeManagerWebApi.Models;
 
-namespace ResumeManagerWebApi.Repositories
+namespace ResumeManagerWebApi.Services
 {
-    public interface IDocumentsRepository
+    public interface IDocumentsService
     {
         public Task<IEnumerable<Document>> GetAllDocuments();
 

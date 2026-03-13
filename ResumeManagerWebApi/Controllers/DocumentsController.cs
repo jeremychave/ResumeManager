@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ResumeManagerWebApi.Repositories;
+using ResumeManagerWebApi.Services;
 
 namespace ResumeManagerWebApi.Controllers
 {
@@ -7,11 +7,18 @@ namespace ResumeManagerWebApi.Controllers
     [Route("api/[controller]")]
     public class DocumentsController : ControllerBase
     {
-        private readonly IDocumentsRepository _documentRepository;
+        private readonly IDocumentsService _documentService;
 
-        public DocumentsController(IDocumentsRepository documentRepository)
+        public DocumentsController(IDocumentsService documentService)
         {
-            _documentRepository = documentRepository;
+            _documentService = documentService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllDocuments()
+        {
+            var documentNames = await _documentService.GetAllDocuments();
+            return Ok(documentNames);
         }
 
         [HttpPost("upload")]
@@ -22,21 +29,21 @@ namespace ResumeManagerWebApi.Controllers
                 return BadRequest("No file uploaded");
             }
 
-            var blobName = await _documentRepository.Upload(file);
+            var blobName = await _documentService.Upload(file);
             return Ok(new { blobName });
         }
 
         [HttpGet("download/{blobName}")]
         public async Task<IActionResult> Download(string blobName)
         {
-            var stream = await _documentRepository.Download(blobName);
+            var stream = await _documentService.Download(blobName);
             return File(stream, "application/octet-stream", blobName);
         }
 
         [HttpDelete("{blobName}")]
         public async Task<IActionResult> Delete(string blobName)
         {
-            await _documentRepository.Delete(blobName);
+            await _documentService.Delete(blobName);
             return NoContent();
         }
     }

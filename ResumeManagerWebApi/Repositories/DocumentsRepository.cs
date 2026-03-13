@@ -1,6 +1,7 @@
 ﻿using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using ResumeManagerWebApi.Models;
 
 namespace ResumeManagerWebApi.Repositories
 {
@@ -18,6 +19,23 @@ namespace ResumeManagerWebApi.Repositories
 
             _container = serviceClient.GetBlobContainerClient(containerName);
             _container.CreateIfNotExists(PublicAccessType.None);
+        }
+
+        public async Task<IEnumerable<Document>> GetAllDocuments()
+        {
+            var documents = new List<Document>();
+            await foreach (var blobItem in _container.GetBlobsAsync())
+            {
+                var document = new Document
+                {
+                    Name = blobItem.Name,
+                    Size = blobItem.Properties.ContentLength ?? 0
+                };
+
+                documents.Add(document);
+            }
+
+            return documents;
         }
 
         public async Task<string> Upload(IFormFile file)
