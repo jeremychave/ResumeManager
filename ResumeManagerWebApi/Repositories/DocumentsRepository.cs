@@ -18,7 +18,6 @@ namespace ResumeManagerWebApi.Repositories
             var serviceClient = new BlobServiceClient(new Uri(storageUrl), credential);
 
             _container = serviceClient.GetBlobContainerClient(containerName);
-            _container.CreateIfNotExists(PublicAccessType.None);
         }
 
         public async Task<IEnumerable<Document>> GetAllDocuments()
