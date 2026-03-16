@@ -10,7 +10,7 @@ builder.Services.AddHttpClient<ProductApiService>(client =>
     client.BaseAddress = new Uri(resumeManagerUrl);
 });
 
-builder.Services.AddHttpClient<ResumeApiService>(client =>
+builder.Services.AddHttpClient<DocumentApiService>(client =>
 {
     client.BaseAddress = new Uri(resumeManagerUrl);
 });

@@ -1,6 +1,6 @@
 ﻿namespace ResumeManagerWebApp.Models
 {
-    public class Resume
+    public class Document
     {
         public string Name { get; set; }
 
