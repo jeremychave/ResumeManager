@@ -32,22 +32,16 @@ namespace ResumeManagerWebApp.Controllers
 
             if (uploadDocumentResponse.Success) 
             {
-                return RedirectToAction(nameof(Index));
-            }
-
-            if (uploadDocumentResponse.Errors != null)
-            {
-                foreach (var error in uploadDocumentResponse.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error);
-                }
+                TempData["Message"] = $"Document {uploadDocumentResponse.BlobName} uploaded successfully.";
             }
             else
             {
-                ModelState.AddModelError(string.Empty, "Upload failed");
+                TempData["Error"] = uploadDocumentResponse.Errors != null 
+                    ? string.Join("<br>", uploadDocumentResponse.Errors) 
+                    : "Upload failed";
             }
 
-            return View();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

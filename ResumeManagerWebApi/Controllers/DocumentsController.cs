@@ -28,11 +28,11 @@ namespace ResumeManagerWebApi.Controllers
 
             if (uploadResponse.Success)
             {
-                return Ok(new { uploadResponse });
+                return Ok(uploadResponse);
             }
             else
             {
-                return BadRequest(new { uploadResponse });
+                return BadRequest(uploadResponse);
             }
         }
 

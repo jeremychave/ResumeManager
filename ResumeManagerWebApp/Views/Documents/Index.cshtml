@@ -3,6 +3,15 @@
 
 <h1>My documents</h1>
 
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@Html.Raw(@TempData["Message"])</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@Html.Raw(TempData["Error"])</div>
+}
+
 <div>
     <a class="btn btn-primary" asp-controller="Documents" asp-action="Upload">
         Upload new document
