@@ -46,8 +46,16 @@ namespace ResumeManagerWebApi.Controllers
         [HttpDelete("{blobName}")]
         public async Task<IActionResult> Delete(string blobName)
         {
-            await _documentService.Delete(blobName);
-            return NoContent();
+            var deleteResponse = await _documentService.Delete(blobName);
+
+            if (deleteResponse.Success)
+            {
+                return Ok(deleteResponse);
+            }
+            else
+            {
+                return BadRequest(deleteResponse);
+            }
         }
     }
 }

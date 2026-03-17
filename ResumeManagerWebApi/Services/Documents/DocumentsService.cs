@@ -30,7 +30,7 @@ namespace ResumeManagerWebApi.Services.Documents
             {
                 return new UploadDocumentResponse
                 {
-                    BlobName = null,
+                    FileName = null,
                     Success = false,
                     Errors = documentsValidationResponse.Errors
                 };
@@ -40,7 +40,7 @@ namespace ResumeManagerWebApi.Services.Documents
 
             return new UploadDocumentResponse
             {
-                BlobName = blobName,
+                FileName = file.FileName,
                 Success = true,
                 Errors = null
             };
@@ -51,9 +51,16 @@ namespace ResumeManagerWebApi.Services.Documents
             return await _documentRepository.Download(blobName);
         }
 
-        public async Task Delete(string blobName)
+        public async Task<DeleteDocumentResponse> Delete(string blobName)
         {
-            await _documentRepository.Delete(blobName);
+            var success = await _documentRepository.Delete(blobName);
+
+            return new DeleteDocumentResponse
+            {
+                Success = success,
+                BlobName = blobName,
+                Errors = success ? null : new List<string> { $"Failed to delete document" }
+            };
         }
     }
 }

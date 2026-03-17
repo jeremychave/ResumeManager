@@ -10,6 +10,6 @@ namespace ResumeManagerWebApi.Repositories
 
         public Task<Stream> Download(string blobName);
 
-        public Task Delete(string blobName);
+        public Task<bool> Delete(string blobName);
     }
 }

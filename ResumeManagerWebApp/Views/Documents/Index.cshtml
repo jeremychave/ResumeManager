@@ -22,14 +22,24 @@
         <tr>
             <th>File name</th>
             <th>Size</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var r in Model)
         {
             <tr>
-                <td>@r.Name</td>
+                <td>@r.FileName</td>
                 <td>@r.Size</td>
+                <td>
+                    <form asp-controller="Documents" asp-action="Delete" method="post" style="display:inline;">
+                        <input type="hidden" name="blobName" value="@r.BlobName" />
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Delete this document?');">
+                            Delete
+                        </button>
+                    </form>
+                </td>
             </tr>
         }
     </tbody>

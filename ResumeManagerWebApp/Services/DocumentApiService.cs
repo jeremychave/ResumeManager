@@ -31,5 +31,12 @@ namespace ResumeManagerWebApp.Services
                 return await response.Content.ReadFromJsonAsync<UploadDocumentResponseDto>();
             }
         }
+
+        public async Task<DeleteDocumentResponseDto> DeleteDocumentAsync(string blobName)
+        {
+            var response = await _httpClient.DeleteAsync($"api/documents/{blobName}");
+
+            return await response.Content.ReadFromJsonAsync<DeleteDocumentResponseDto>();
+        }
     }
 }

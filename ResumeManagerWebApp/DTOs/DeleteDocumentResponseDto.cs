@@ -1,6 +1,6 @@
 ﻿namespace ResumeManagerWebApp.DTOs
 {
-    public class UploadDocumentResponseDto
+    public class DeleteDocumentResponseDto
     {
         public bool Success { get; set; }
 

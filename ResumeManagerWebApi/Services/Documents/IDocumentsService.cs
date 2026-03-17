@@ -11,6 +11,6 @@ namespace ResumeManagerWebApi.Services.Documents
 
         public Task<Stream> Download(string blobName);
 
-        public Task Delete(string blobName);
+        public Task<DeleteDocumentResponse> Delete(string blobName);
     }
 }

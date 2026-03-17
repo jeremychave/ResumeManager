@@ -27,7 +27,8 @@ namespace ResumeManagerWebApi.Repositories
             {
                 var document = new Document
                 {
-                    Name = blobItem.Name,
+                    BlobName = blobItem.Metadata.TryGetValue("FileName", out var name) ? name : blobItem.Name,
+                    FileName = blobItem.Name,
                     Size = blobItem.Properties.ContentLength ?? 0
                 };
 
@@ -41,8 +42,18 @@ namespace ResumeManagerWebApi.Repositories
         {
             var blob = _container.GetBlobClient(Guid.NewGuid() + Path.GetExtension(file.FileName));
 
-            using var stream = file.OpenReadStream();
-            await blob.UploadAsync(stream, new BlobHttpHeaders { ContentType = file.ContentType });
+            var metadata = new Dictionary<string, string>
+            {
+                { "FileName", file.FileName }
+            };
+
+            using (var stream = file.OpenReadStream()) 
+            {
+                await blob.UploadAsync(
+                stream,
+                new BlobHttpHeaders { ContentType = file.ContentType },
+                metadata: metadata);
+            };
 
             return blob.Name;
         }
@@ -54,10 +65,10 @@ namespace ResumeManagerWebApi.Repositories
             return response.Value.Content;
         }
 
-        public async Task Delete(string blobName)
+        public async Task<bool> Delete(string blobName)
         {
             var blob = _container.GetBlobClient(blobName);
-            await blob.DeleteIfExistsAsync();
+            return await blob.DeleteIfExistsAsync();
         }
     }
 }
