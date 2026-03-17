@@ -1,5 +1,5 @@
 using ResumeManagerWebApi.Repositories;
-using ResumeManagerWebApi.Services;
+using ResumeManagerWebApi.Services.Documents;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<IDocumentsService, DocumentsService>();
+builder.Services.AddScoped<IDocumentsValidationService, DocumentsValidationService>();
 builder.Services.AddScoped<IDocumentsRepository, DocumentsRepository>();
 
 var app = builder.Build();

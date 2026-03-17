@@ -1,9 +1,13 @@
 ﻿@using ResumeManagerWebApp.Models
 @model List<Document>
 
-<h2>This is the Resume page</h2>
+<h1>My documents</h1>
 
-<h1>My resume</h1>
+<div>
+    <a class="btn btn-primary" asp-controller="Documents" asp-action="Upload">
+        Upload new document
+    </a>
+</div>
 <table class="table">
     <thead>
         <tr>

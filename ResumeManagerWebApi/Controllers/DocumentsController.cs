@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using ResumeManagerWebApi.Services;
+using ResumeManagerWebApi.Services.Documents;
 
 namespace ResumeManagerWebApi.Controllers
 {
@@ -24,13 +24,16 @@ namespace ResumeManagerWebApi.Controllers
         [HttpPost("upload")]
         public async Task<IActionResult> Upload(IFormFile file)
         {
-            if (file == null || file.Length == 0)
-            {
-                return BadRequest("No file uploaded");
-            }
+            var uploadResponse = await _documentService.Upload(file);
 
-            var blobName = await _documentService.Upload(file);
-            return Ok(new { blobName });
+            if (uploadResponse.Success)
+            {
+                return Ok(new { uploadResponse });
+            }
+            else
+            {
+                return BadRequest(new { uploadResponse });
+            }
         }
 
         [HttpGet("download/{blobName}")]

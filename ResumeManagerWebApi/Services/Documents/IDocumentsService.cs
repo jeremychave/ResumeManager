@@ -1,12 +1,13 @@
 ﻿using ResumeManagerWebApi.Models;
+using ResumeManagerWebApi.Services.Documents.Responses;
 
-namespace ResumeManagerWebApi.Services
+namespace ResumeManagerWebApi.Services.Documents
 {
     public interface IDocumentsService
     {
         public Task<IEnumerable<Document>> GetAllDocuments();
 
-        public Task<string> Upload(IFormFile file);
+        public Task<UploadDocumentResponse> Upload(IFormFile file);
 
         public Task<Stream> Download(string blobName);
 

@@ -1,4 +1,5 @@
-﻿using ResumeManagerWebApp.Models;
+﻿using ResumeManagerWebApp.DTOs;
+using ResumeManagerWebApp.Models;
 
 namespace ResumeManagerWebApp.Services
 {
@@ -17,6 +18,18 @@ namespace ResumeManagerWebApp.Services
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadFromJsonAsync<List<Document>>();
+        }
+
+        public async Task<UploadDocumentResponseDto> UploadDocumentAsync(IFormFile file)
+        {
+            using (var content = new MultipartFormDataContent())
+            {
+                content.Add(new StreamContent(file.OpenReadStream()), "file", file.FileName);
+
+                var response = await _httpClient.PostAsync("api/documents/upload", content);
+
+                return await response.Content.ReadFromJsonAsync<UploadDocumentResponseDto>();
+            }
         }
     }
 }
