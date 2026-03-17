@@ -27,8 +27,8 @@ namespace ResumeManagerWebApi.Repositories
             {
                 var document = new Document
                 {
-                    BlobName = blobItem.Metadata.TryGetValue("FileName", out var name) ? name : blobItem.Name,
-                    FileName = blobItem.Name,
+                    BlobName = blobItem.Name,
+                    FileName = blobItem.Metadata.TryGetValue("FileName", out var name) ? name : blobItem.Name,
                     Size = blobItem.Properties.ContentLength ?? 0
                 };
 
