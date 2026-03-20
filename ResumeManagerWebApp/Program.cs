@@ -5,11 +5,6 @@ builder.Services.AddControllersWithViews();
 
 var resumeManagerUrl = builder.Configuration["ApiSettings:ResumeManagerWebApi"];
 
-builder.Services.AddHttpClient<ProductApiService>(client =>
-{
-    client.BaseAddress = new Uri(resumeManagerUrl);
-});
-
 builder.Services.AddHttpClient<DocumentApiService>(client =>
 {
     client.BaseAddress = new Uri(resumeManagerUrl);
@@ -18,7 +13,5 @@ builder.Services.AddHttpClient<DocumentApiService>(client =>
 var app = builder.Build();
 app.UseStaticFiles();
 app.MapDefaultControllerRoute();
-
-//app.MapGet("/", () => "Hello World!");
 
 app.Run();
