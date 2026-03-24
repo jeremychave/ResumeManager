@@ -54,7 +54,16 @@ builder.Services.AddAuthentication(options =>
 //    });
 
 var app = builder.Build();
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseStaticFiles();
-app.MapDefaultControllerRoute();
+app.UseEndpoints(app =>
+{
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+});
+//app.MapDefaultControllerRoute();
 
 app.Run();

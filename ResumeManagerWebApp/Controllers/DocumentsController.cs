@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ResumeManagerWebApp.Services;
 
 namespace ResumeManagerWebApp.Controllers
 {
+    [Authorize]
     public class DocumentsController : Controller
     {
         private readonly DocumentApiService _apiService;
