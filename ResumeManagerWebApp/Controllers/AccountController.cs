@@ -21,17 +21,14 @@ public class AccountController : Controller
             OpenIdConnectDefaults.AuthenticationScheme);
     }
 
-    //public IActionResult Logout()
-    //{
-    //    return SignOut(
-    //        new AuthenticationProperties { RedirectUri = "/" },
-    //        CookieAuthenticationDefaults.AuthenticationScheme,
-    //        OpenIdConnectDefaults.AuthenticationScheme
-    //    );
-    //}
+    public async Task<IActionResult> Logout()
+    {
+        var redirectUrl = Url.Action(nameof(DocumentsController.Index), "Home", null, Request.Scheme);
 
-    //public IActionResult AccessDenied()
-    //{
-    //    return View();
-    //}
+        return SignOut(
+            new AuthenticationProperties { RedirectUri = redirectUrl },
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            OpenIdConnectDefaults.AuthenticationScheme
+        );
+    }
 }

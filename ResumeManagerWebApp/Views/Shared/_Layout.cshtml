@@ -11,8 +11,20 @@
 </head>
 <body>
     <div class="container">
-        <header class="py-3">
+        <header class="py-3 d-flex justify-content-between align-items-center">
             <h1 class="h3">ResumeManager</h1>
+
+            <div>
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <span class="me-3">Hello @User.Identity.Name</span>
+                    <a class="btn btn-outline-danger" asp-controller="Account" asp-action="Logout">Logout</a>
+                }
+                else
+                {
+                    <a class="btn btn-primary" asp-controller="Account" asp-action="Login">Login</a>
+                }
+            </div>
         </header>
 
         <main role="main" class="pb-3">

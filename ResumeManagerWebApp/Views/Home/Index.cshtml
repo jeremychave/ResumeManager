@@ -7,15 +7,11 @@
     <p>This is an exciting resume manager web application</p>
 </div>
 
-<div>
-    <a class="btn btn-primary" asp-controller="Account" asp-action="Login">
-        Login
-    </a>
-</div>
-
-
-<div> 
-    <a class="btn btn-primary" asp-controller="Documents" asp-action="Index">
-        Go to documents
-    </a>
-</div>
+@if (User.Identity?.IsAuthenticated ?? false)
+{
+    <div>
+        <a class="btn btn-primary" asp-controller="Documents" asp-action="Index">
+            Go to documents
+        </a>
+    </div>
+}
