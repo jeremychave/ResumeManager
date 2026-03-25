@@ -11,10 +11,10 @@ public class AccountController : Controller
     {
         if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            return RedirectToAction(nameof(DocumentsController.Index), "Document");
+            return RedirectToAction(nameof(DocumentsController.Index), "Documents");
         }
 
-        var redirectUrl = Url.Action(nameof(DocumentsController.Index), "Document", null, Request.Scheme);
+        var redirectUrl = Url.Action(nameof(DocumentsController.Index), "Documents", null, Request.Scheme);
 
         return Challenge(
             new AuthenticationProperties { RedirectUri = redirectUrl },
