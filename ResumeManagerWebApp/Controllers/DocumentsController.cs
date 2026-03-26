@@ -17,7 +17,8 @@ namespace ResumeManagerWebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var documents = await _apiService.GetAllDocumentsAsync();
+            var userEmail = User.FindFirst("preferred_username")?.Value;
+            var documents = await _apiService.GetAllDocumentsAsync(userEmail);
             return View(documents);
         }
 

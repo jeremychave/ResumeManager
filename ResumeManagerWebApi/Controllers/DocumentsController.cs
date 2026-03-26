@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ResumeManagerWebApi.Common;
 using ResumeManagerWebApi.Services.Documents;
 
 namespace ResumeManagerWebApi.Controllers
@@ -8,15 +9,29 @@ namespace ResumeManagerWebApi.Controllers
     public class DocumentsController : ControllerBase
     {
         private readonly IDocumentsService _documentService;
+        private readonly IConfiguration _configuration;
 
-        public DocumentsController(IDocumentsService documentService)
+        public DocumentsController(IDocumentsService documentService, IConfiguration configuration)
         {
             _documentService = documentService;
+            _configuration = configuration;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllDocuments()
         {
+            if (!Request.Headers.TryGetValue(AppConstants.HeaderHttpApiKey, out var apiKey) ||
+                apiKey != _configuration["ApiSettings:ResumeManagerApiKey"])
+            {
+                return Unauthorized("Invalid API Key");
+            }
+
+            var userEmail = Request.Headers[AppConstants.HeaderHttpUserEmail].ToString();
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return Unauthorized("Missing user Email");
+            }
+
             var documentNames = await _documentService.GetAllDocuments();
             return Ok(documentNames);
         }

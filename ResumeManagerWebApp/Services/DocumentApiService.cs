@@ -1,4 +1,5 @@
-﻿using ResumeManagerWebApp.DTOs;
+﻿using ResumeManagerWebApp.Common;
+using ResumeManagerWebApp.DTOs;
 using ResumeManagerWebApp.Models;
 
 namespace ResumeManagerWebApp.Services
@@ -6,19 +7,24 @@ namespace ResumeManagerWebApp.Services
     public class DocumentApiService
     {
         private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
 
-        public DocumentApiService(HttpClient httpClient)
+        public DocumentApiService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
+            _configuration = configuration;
         }
 
-        public async Task<List<Document>> GetAllDocumentsAsync()
+        public async Task<List<Document>> GetAllDocumentsAsync(string userEmail)
         {
-            var response = await _httpClient.GetAsync("api/documents");
+            var request = new HttpRequestMessage(HttpMethod.Get, "api/documents");
+            this.AddHttpHeader(request, userEmail);
+
+            var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadFromJsonAsync<List<Document>>();
-        }
+        }        
 
         public async Task<UploadDocumentResponseDto> UploadDocumentAsync(IFormFile file)
         {
@@ -37,6 +43,13 @@ namespace ResumeManagerWebApp.Services
             var response = await _httpClient.DeleteAsync($"api/documents/{blobName}");
 
             return await response.Content.ReadFromJsonAsync<DeleteDocumentResponseDto>();
+        }
+
+        private void AddHttpHeader(HttpRequestMessage request, string userEmail)
+        {
+            var apiKey = _configuration["ApiSettings:ResumeManagerApiKey"];
+            request.Headers.Add(AppConstants.HeaderHttpUserEmail, userEmail);
+            request.Headers.Add(AppConstants.HeaderHttpApiKey, apiKey);
         }
     }
 }
