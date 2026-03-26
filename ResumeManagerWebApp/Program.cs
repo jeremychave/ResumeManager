@@ -1,3 +1,4 @@
+using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Identity.Web;
 using ResumeManagerWebApp.Services;
@@ -15,6 +16,12 @@ builder.Services.AddHttpClient<DocumentApiService>(client =>
 builder.Services
     .AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration);
+
+var keyVaultUrl = builder.Configuration["KeyVaultUrl"];
+builder.Configuration.AddAzureKeyVault(
+    new Uri(keyVaultUrl),
+    new DefaultAzureCredential()
+);
 
 var app = builder.Build();
 app.UseHttpsRedirection();
