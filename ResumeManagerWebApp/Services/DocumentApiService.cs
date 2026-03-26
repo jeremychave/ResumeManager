@@ -48,8 +48,13 @@ namespace ResumeManagerWebApp.Services
         private void AddHttpHeader(HttpRequestMessage request, string userEmail)
         {
             var apiKey = _configuration["ApiSettings:ResumeManagerApiKey"];
+            var secret = _configuration["ApiSettings:SignatureSecret"];
+
+            var signature = HmacHelper.GenerateSignature(userEmail, secret);
+
             request.Headers.Add(AppConstants.HeaderHttpUserEmail, userEmail);
             request.Headers.Add(AppConstants.HeaderHttpApiKey, apiKey);
+            request.Headers.Add(AppConstants.HeaderHttpUserSignature, signature);
         }
     }
 }

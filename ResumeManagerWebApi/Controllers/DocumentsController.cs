@@ -20,16 +20,11 @@ namespace ResumeManagerWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllDocuments()
         {
-            if (!Request.Headers.TryGetValue(AppConstants.HeaderHttpApiKey, out var apiKey) ||
-                apiKey != _configuration["ApiSettings:ResumeManagerApiKey"])
-            {
-                return Unauthorized("Invalid API Key");
-            }
+            var validationError = ValidateRequestHeader(Request.Headers);
 
-            var userEmail = Request.Headers[AppConstants.HeaderHttpUserEmail].ToString();
-            if (string.IsNullOrEmpty(userEmail))
+            if (!string.IsNullOrEmpty(validationError))
             {
-                return Unauthorized("Missing user Email");
+                return Unauthorized(validationError);
             }
 
             var documentNames = await _documentService.GetAllDocuments();
@@ -71,6 +66,32 @@ namespace ResumeManagerWebApi.Controllers
             {
                 return BadRequest(deleteResponse);
             }
+        }
+
+        private string ValidateRequestHeader(IHeaderDictionary header)
+        {
+            if (!header.TryGetValue(AppConstants.HeaderHttpApiKey, out var apiKey) ||
+                apiKey != _configuration["ApiSettings:ResumeManagerApiKey"])
+            {
+                return "Invalid API Key";
+            }
+
+            var signature = Request.Headers[AppConstants.HeaderHttpUserSignature].ToString();
+            var userEmail = Request.Headers[AppConstants.HeaderHttpUserEmail].ToString();
+            var secret = _configuration["ApiSettings:SignatureSecret"];
+            var expectedSignature = HmacHelper.GenerateSignature(userEmail, secret);
+
+            if (signature != expectedSignature)
+            {
+                return "Invalid signature";
+            }
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return "Missing user Email";
+            }
+
+            return null;
         }
     }
 }

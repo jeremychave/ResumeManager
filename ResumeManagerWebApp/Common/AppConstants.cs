@@ -4,5 +4,6 @@
     {
         public const string HeaderHttpApiKey = "X-Api-Key";
         public const string HeaderHttpUserEmail = "X-User-Email";
+        public const string HeaderHttpUserSignature = "X-User-Signature";
     }
 }
