@@ -1,6 +1,6 @@
-﻿using ResumeManagerWebApi.Models;
+﻿using ResumeManagerWebApi.Dtos;
 
-namespace ResumeManagerWebApi.Repositories
+namespace ResumeManagerWebApi.Data.Repositories
 {
     public interface IDocumentsRepository
     {

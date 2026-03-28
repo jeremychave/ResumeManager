@@ -1,9 +1,9 @@
 ﻿using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using ResumeManagerWebApi.Models;
+using ResumeManagerWebApi.Dtos;
 
-namespace ResumeManagerWebApi.Repositories
+namespace ResumeManagerWebApi.Data.Repositories
 {
     public class DocumentsRepository : IDocumentsRepository
     {

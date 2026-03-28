@@ -1,4 +1,4 @@
-﻿using ResumeManagerWebApi.Models;
+﻿using ResumeManagerWebApi.Dtos;
 using ResumeManagerWebApi.Services.Documents.Responses;
 
 namespace ResumeManagerWebApi.Services.Documents

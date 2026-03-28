@@ -1,4 +1,4 @@
-﻿namespace ResumeManagerWebApi.Models
+﻿namespace ResumeManagerWebApi.Dtos
 {
     public class Document
     {

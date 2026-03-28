@@ -1,5 +1,5 @@
-﻿using ResumeManagerWebApi.Models;
-using ResumeManagerWebApi.Repositories;
+﻿using ResumeManagerWebApi.Data.Repositories;
+using ResumeManagerWebApi.Dtos;
 using ResumeManagerWebApi.Services.Documents.Responses;
 
 namespace ResumeManagerWebApi.Services.Documents
