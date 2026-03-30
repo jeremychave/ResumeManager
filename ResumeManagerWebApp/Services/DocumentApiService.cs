@@ -1,10 +1,10 @@
 ﻿using ResumeManagerWebApp.Common;
-using ResumeManagerWebApp.DTOs;
+using ResumeManagerWebApp.DTOs.Document;
 using ResumeManagerWebApp.Models;
 
 namespace ResumeManagerWebApp.Services
 {
-    public class DocumentApiService
+    public class DocumentApiService : IDocumentApiService
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
@@ -24,7 +24,7 @@ namespace ResumeManagerWebApp.Services
             response.EnsureSuccessStatusCode();
 
             return await response.Content.ReadFromJsonAsync<List<Document>>();
-        }        
+        }
 
         public async Task<UploadDocumentResponseDto> UploadDocumentAsync(IFormFile file)
         {

@@ -1,4 +1,4 @@
-﻿namespace ResumeManagerWebApp.DTOs
+﻿namespace ResumeManagerWebApp.DTOs.Document
 {
     public class UploadDocumentResponseDto
     {

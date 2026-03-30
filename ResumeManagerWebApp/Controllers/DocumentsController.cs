@@ -7,9 +7,9 @@ namespace ResumeManagerWebApp.Controllers
     [Authorize]
     public class DocumentsController : Controller
     {
-        private readonly DocumentApiService _apiService;
+        private readonly IDocumentApiService _apiService;
 
-        public DocumentsController(DocumentApiService apiService)
+        public DocumentsController(IDocumentApiService apiService)
         {
             _apiService = apiService;
         }

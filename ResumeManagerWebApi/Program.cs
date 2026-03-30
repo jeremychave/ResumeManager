@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ResumeManagerWebApi.Data;
 using ResumeManagerWebApi.Data.Repositories;
 using ResumeManagerWebApi.Services.Documents;
+using ResumeManagerWebApi.Services.User;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddDbContext<ResumeManagerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ResumeManagerDb")));
 
 builder.Services.AddControllers();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDocumentsService, DocumentsService>();
 builder.Services.AddScoped<IDocumentsValidationService, DocumentsValidationService>();
 builder.Services.AddScoped<IDocumentsRepository, DocumentsRepository>();
