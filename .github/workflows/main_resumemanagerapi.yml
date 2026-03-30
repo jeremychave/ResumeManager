@@ -66,9 +66,11 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_103DE73A1D674EFB92B9CF94A1848FEF }}
 
       - name: Apply EF Core migrations
+        env: 
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_RESUMEMANAGER }}
         run: |
           cd ResumeManagerWebApi
-          dotnet ef database update --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING_RESUMEMANAGER }}"
+          dotnet ef database update
 
   deploy:
     runs-on: windows-latest
