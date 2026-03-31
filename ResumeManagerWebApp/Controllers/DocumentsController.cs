@@ -51,7 +51,8 @@ namespace ResumeManagerWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(string blobName)
         {
-            var response = await _apiService.DeleteDocumentAsync(blobName);
+            var userEmail = User.FindFirst("preferred_username")?.Value;
+            var response = await _apiService.DeleteDocumentAsync(blobName, userEmail);
 
             if (response.Success)
             {

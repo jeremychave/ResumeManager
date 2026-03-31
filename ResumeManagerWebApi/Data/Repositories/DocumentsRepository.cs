@@ -45,6 +45,21 @@ namespace ResumeManagerWebApi.Data.Repositories
             return newDocument;
         }
 
+
+        public async Task DeleteUserDocument(Guid userId, string blobName)
+        {
+            var userDocument = _context.UserDocument
+                .FirstOrDefault(ud => ud.UserId == userId && ud.BlobName == blobName);
+
+            if (userDocument == null)
+            {
+                throw new KeyNotFoundException($"Unable to find document with blob name {blobName} for this user");
+            }
+
+            _context.UserDocument.Remove(userDocument);
+            _context.SaveChanges();
+        }
+
         public async Task<BlobProperties> GetBlobProperties(string blobName)
         {
             return await _container.GetBlobClient(blobName).GetPropertiesAsync();
@@ -71,7 +86,7 @@ namespace ResumeManagerWebApi.Data.Repositories
             return response.Value.Content;
         }
 
-        public async Task<bool> Delete(string blobName)
+        public async Task<bool> DeleteBlob(string blobName)
         {
             var blob = _container.GetBlobClient(blobName);
             return await blob.DeleteIfExistsAsync();

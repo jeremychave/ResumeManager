@@ -72,10 +72,10 @@ namespace ResumeManagerWebApi.Controllers
             return File(stream, "application/octet-stream", blobName);
         }
 
-        [HttpDelete("{blobName}")]
-        public async Task<IActionResult> Delete(string blobName)
+        [HttpDelete("{blobName}/{userEmail}")]
+        public async Task<IActionResult> Delete(string blobName, string userEmail)
         {
-            var deleteResponse = await _documentService.Delete(blobName);
+            var deleteResponse = await _documentService.Delete(blobName, userEmail);
 
             if (deleteResponse.Success)
             {

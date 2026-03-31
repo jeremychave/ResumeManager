@@ -79,9 +79,12 @@ namespace ResumeManagerWebApi.Services.Documents
             return await _documentRepository.Download(blobName);
         }
 
-        public async Task<DeleteDocumentResponse> Delete(string blobName)
+        public async Task<DeleteDocumentResponse> Delete(string blobName, string userEmail)
         {
-            var success = await _documentRepository.Delete(blobName);
+            var user = await _userRepository.Get(userEmail);
+
+            await _documentRepository.DeleteUserDocument(user.Id, blobName);
+            var success = await _documentRepository.DeleteBlob(blobName);
 
             return new DeleteDocumentResponse
             {

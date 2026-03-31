@@ -9,6 +9,6 @@ namespace ResumeManagerWebApp.Services
 
         Task<UploadDocumentResponseDto> UploadDocumentAsync(IFormFile file, string userEmail);
 
-        Task<DeleteDocumentResponseDto> DeleteDocumentAsync(string blobName);
+        Task<DeleteDocumentResponseDto> DeleteDocumentAsync(string blobName, string userEmail);
     }
 }

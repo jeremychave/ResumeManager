@@ -58,9 +58,9 @@ namespace ResumeManagerWebApp.Services
             }
         }
 
-        public async Task<DeleteDocumentResponseDto> DeleteDocumentAsync(string blobName)
+        public async Task<DeleteDocumentResponseDto> DeleteDocumentAsync(string blobName, string userEmail)
         {
-            var response = await _httpClient.DeleteAsync($"api/documents/{blobName}");
+            var response = await _httpClient.DeleteAsync($"api/documents/{blobName}/{userEmail}");
 
             return await response.Content.ReadFromJsonAsync<DeleteDocumentResponseDto>();
         }
