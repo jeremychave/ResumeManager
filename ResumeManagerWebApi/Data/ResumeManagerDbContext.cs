@@ -29,7 +29,7 @@ namespace ResumeManagerWebApi.Data
             {
                 entity.HasKey(u => u.Id);
                 entity.HasIndex(u => u.BlobName).IsUnique();
-                entity.HasIndex(u => u.FileName).IsUnique();
+                entity.HasIndex(u => u.FileName);
             });
         }
     }
