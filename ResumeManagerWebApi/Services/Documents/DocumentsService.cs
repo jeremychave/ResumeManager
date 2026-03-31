@@ -25,26 +25,30 @@ namespace ResumeManagerWebApi.Services.Documents
             var documentBos = new List<DocumentBo>();
 
             var user = await _userRepository.Get(userEmail);
-            var userDocuments = await _documentRepository.GetUserDocuments(user.Id);
 
-            foreach (var userDocument in userDocuments)
+            if(user != null)
             {
-                var blobSize = (await _documentRepository.GetBlobProperties(userDocument.BlobName)).ContentLength;
+                var userDocuments = await _documentRepository.GetUserDocuments(user.Id);
 
-                documentBos.Add(new DocumentBo
+                foreach (var userDocument in userDocuments)
                 {
-                    Id = userDocument.Id,
-                    UserId = userDocument.UserId,
-                    BlobName = userDocument.BlobName,
-                    FileName = userDocument.FileName,
-                    Size = blobSize
-                });
+                    var blobSize = (await _documentRepository.GetBlobProperties(userDocument.BlobName)).ContentLength;
+
+                    documentBos.Add(new DocumentBo
+                    {
+                        Id = userDocument.Id,
+                        UserId = userDocument.UserId,
+                        BlobName = userDocument.BlobName,
+                        FileName = userDocument.FileName,
+                        Size = blobSize
+                    });
+                }
             }
 
             return documentBos;
         }
 
-        public async Task<UploadDocumentResponse> Upload(IFormFile file)
+        public async Task<UploadDocumentResponse> Upload(IFormFile file, string userEmail)
         {
             var documentsValidationResponse = _documentsValidationService.Validate(file);
 
@@ -58,7 +62,9 @@ namespace ResumeManagerWebApi.Services.Documents
                 };
             }
 
-            var blobName = await _documentRepository.Upload(file);
+            var blobName = await _documentRepository.UploadBlob(file);
+            var user = await _userRepository.Get(userEmail);
+            await _documentRepository.AddUserDocument(user.Id, blobName, file.FileName);
 
             return new UploadDocumentResponse
             {

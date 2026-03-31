@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ResumeManagerWebApi.Controllers.Dtos;
+using ResumeManagerWebApi.Controllers.Dtos.User;
 using ResumeManagerWebApi.Services.User;
 
 namespace ResumeManagerWebApi.Controllers

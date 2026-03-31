@@ -29,26 +29,36 @@ namespace ResumeManagerWebApi.Data.Repositories
                 .ToList();
         }
 
+        public async Task<UserDocument> AddUserDocument(Guid userId, string blobName, string fileName)
+        {
+            var newDocument = new UserDocument
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                BlobName = blobName,
+                FileName = fileName
+            };
+
+            _context.UserDocument.Add(newDocument);
+            _context.SaveChanges();
+
+            return newDocument;
+        }
+
         public async Task<BlobProperties> GetBlobProperties(string blobName)
         {
             return await _container.GetBlobClient(blobName).GetPropertiesAsync();
         }
 
-        public async Task<string> Upload(IFormFile file)
+        public async Task<string> UploadBlob(IFormFile file)
         {
             var blob = _container.GetBlobClient(Guid.NewGuid() + Path.GetExtension(file.FileName));
-
-            var metadata = new Dictionary<string, string>
-            {
-                { "FileName", file.FileName }
-            };
 
             using (var stream = file.OpenReadStream()) 
             {
                 await blob.UploadAsync(
                 stream,
-                new BlobHttpHeaders { ContentType = file.ContentType },
-                metadata: metadata);
+                new BlobHttpHeaders { ContentType = file.ContentType });
             };
 
             return blob.Name;

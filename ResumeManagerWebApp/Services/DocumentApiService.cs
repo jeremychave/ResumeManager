@@ -42,14 +42,18 @@ namespace ResumeManagerWebApp.Services
             }
         }
 
-        public async Task<UploadDocumentResponseDto> UploadDocumentAsync(IFormFile file)
+        public async Task<UploadDocumentResponseDto> UploadDocumentAsync(IFormFile file, string userEmail)
         {
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/documents/upload");
+
+            this.AddHttpHeader(request, userEmail);
+
             using (var content = new MultipartFormDataContent())
             {
                 content.Add(new StreamContent(file.OpenReadStream()), "file", file.FileName);
-
-                var response = await _httpClient.PostAsync("api/documents/upload", content);
-
+                content.Add(new StringContent(userEmail), "userEmail");
+                request.Content = content;
+                var response = await _httpClient.SendAsync(request);
                 return await response.Content.ReadFromJsonAsync<UploadDocumentResponseDto>();
             }
         }

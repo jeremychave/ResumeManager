@@ -1,4 +1,4 @@
-﻿namespace ResumeManagerWebApi.Controllers.Dtos
+﻿namespace ResumeManagerWebApi.Controllers.Dtos.Document
 {
     public class DocumentDto
     {

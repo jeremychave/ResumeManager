@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ResumeManagerWebApi.Common;
-using ResumeManagerWebApi.Controllers.Dtos;
+using ResumeManagerWebApi.Controllers.Dtos.Document;
 using ResumeManagerWebApi.Services.Documents;
 
 namespace ResumeManagerWebApi.Controllers
@@ -44,9 +44,16 @@ namespace ResumeManagerWebApi.Controllers
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> Upload([FromForm] UploadDocumentRequestDto request)
         {
-            var uploadResponse = await _documentService.Upload(file);
+            var validationError = ValidateRequestHeader(Request.Headers);
+
+            if (!string.IsNullOrEmpty(validationError))
+            {
+                return Unauthorized(validationError);
+            }
+
+            var uploadResponse = await _documentService.Upload(request.File, request.UserEmail);
 
             if (uploadResponse.Success)
             {

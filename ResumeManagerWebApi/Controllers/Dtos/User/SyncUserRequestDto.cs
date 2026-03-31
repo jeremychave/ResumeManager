@@ -1,4 +1,4 @@
-﻿namespace ResumeManagerWebApi.Controllers.Dtos
+﻿namespace ResumeManagerWebApi.Controllers.Dtos.User
 {
     public class SyncUserRequestDto
     {

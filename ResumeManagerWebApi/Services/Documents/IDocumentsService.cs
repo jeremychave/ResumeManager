@@ -7,7 +7,7 @@ namespace ResumeManagerWebApi.Services.Documents
     {
         public Task<IEnumerable<DocumentBo>> GetAllDocuments(string userEmail);
 
-        public Task<UploadDocumentResponse> Upload(IFormFile file);
+        public Task<UploadDocumentResponse> Upload(IFormFile file, string userEmail);
 
         public Task<Stream> Download(string blobName);
 

@@ -31,9 +31,10 @@ namespace ResumeManagerWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile file)
         {
-            var uploadDocumentResponse = await _apiService.UploadDocumentAsync(file);
+            var userEmail = User.FindFirst("preferred_username")?.Value;
+            var uploadDocumentResponse = await _apiService.UploadDocumentAsync(file, userEmail);
 
-            if (uploadDocumentResponse.Success) 
+            if (uploadDocumentResponse.Success)
             {
                 TempData["Message"] = $"Document {uploadDocumentResponse.FileName} uploaded successfully.";
             }
