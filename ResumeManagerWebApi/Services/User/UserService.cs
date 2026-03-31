@@ -11,13 +11,13 @@ namespace ResumeManagerWebApi.Services.User
             _userRepository = userRepository;
         }
 
-        public void SyncUser(string email)
+        public async Task SyncUser(string email)
         {
-            var user = _userRepository.Get(email);
+            var user = await _userRepository.Get(email);
 
             if (user == null)
             {
-                _userRepository.Create(email);
+                await _userRepository.Create(email);
             }
         }
     }

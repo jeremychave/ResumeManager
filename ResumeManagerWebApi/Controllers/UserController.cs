@@ -18,7 +18,7 @@ namespace ResumeManagerWebApi.Controllers
         [HttpPost("sync")]
         public async Task<IActionResult> SyncUser(SyncUserRequestDto request)
         {
-            _userService.SyncUser(request.Email);
+            await _userService.SyncUser(request.Email);
             return Ok();
         }
     }
