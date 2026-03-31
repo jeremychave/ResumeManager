@@ -11,12 +11,12 @@ namespace ResumeManagerWebApi.Data.Repositories
             _context = context;
         }
 
-        public User Get(string email)
+        public async Task<User> Get(string email)
         {
             return _context.Users.FirstOrDefault(u => u.Email == email);
         }
 
-        public User Create(string email)
+        public async Task<User> Create(string email)
         {
             var user = new User
             {
@@ -30,7 +30,7 @@ namespace ResumeManagerWebApi.Data.Repositories
             return user;
         }
 
-        public void Delete(string email)
+        public async Task Delete(string email)
         {
             var user = _context.Users.FirstOrDefault(u => u.Email == email);
 

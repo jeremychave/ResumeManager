@@ -17,13 +17,29 @@ namespace ResumeManagerWebApp.Services
 
         public async Task<List<Document>> GetAllDocumentsAsync(string userEmail)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "api/documents");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"api/documents/{userEmail}");
+
             this.AddHttpHeader(request, userEmail);
 
             var response = await _httpClient.SendAsync(request);
+
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<List<Document>>();
+            var responseDto = await response.Content.ReadFromJsonAsync<GetAllDocumentsResponseDto>();
+
+            if (responseDto.Documents != null) 
+            {
+                return responseDto.Documents.Select(dto => new Document
+                {
+                    BlobName = dto.BlobName,
+                    FileName = dto.FileName,
+                    Size = dto.Size
+                }).ToList();
+            }
+            else
+            {
+                return new List<Document>();
+            }
         }
 
         public async Task<UploadDocumentResponseDto> UploadDocumentAsync(IFormFile file)

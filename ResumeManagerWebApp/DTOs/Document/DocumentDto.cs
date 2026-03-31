@@ -1,6 +1,6 @@
-﻿namespace ResumeManagerWebApi.Dtos
+﻿namespace ResumeManagerWebApp.DTOs.Document
 {
-    public class Document
+    public class DocumentDto
     {
         public string BlobName { get; set; }
 

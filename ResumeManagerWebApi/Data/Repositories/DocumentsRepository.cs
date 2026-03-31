@@ -1,15 +1,16 @@
 ﻿using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using ResumeManagerWebApi.Dtos;
+using ResumeManagerWebApi.Data.Entities;
 
 namespace ResumeManagerWebApi.Data.Repositories
 {
     public class DocumentsRepository : IDocumentsRepository
     {
         private readonly BlobContainerClient _container;
+        private readonly ResumeManagerDbContext _context;
 
-        public DocumentsRepository(IConfiguration config)
+        public DocumentsRepository(IConfiguration config, ResumeManagerDbContext context)
         {
             var storageUrl = config["AzureStorage:BlobServiceUrl"];
             var containerName = config["AzureStorage:ContainerName"];
@@ -18,24 +19,19 @@ namespace ResumeManagerWebApi.Data.Repositories
             var serviceClient = new BlobServiceClient(new Uri(storageUrl), credential);
 
             _container = serviceClient.GetBlobContainerClient(containerName);
+            _context = context;
         }
 
-        public async Task<IEnumerable<Document>> GetAllDocuments()
+        public async Task<IEnumerable<UserDocument>> GetUserDocuments(Guid userId)
         {
-            var documents = new List<Document>();
-            await foreach (var blobItem in _container.GetBlobsAsync())
-            {
-                var document = new Document
-                {
-                    BlobName = blobItem.Name,
-                    FileName = blobItem.Metadata.TryGetValue("FileName", out var name) ? name : blobItem.Name,
-                    Size = blobItem.Properties.ContentLength ?? 0
-                };
+            return _context.UserDocument
+                .Where(ud => ud.UserId == userId)
+                .ToList();
+        }
 
-                documents.Add(document);
-            }
-
-            return documents;
+        public async Task<BlobProperties> GetBlobProperties(string blobName)
+        {
+            return await _container.GetBlobClient(blobName).GetPropertiesAsync();
         }
 
         public async Task<string> Upload(IFormFile file)

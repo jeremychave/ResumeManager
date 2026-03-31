@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ResumeManagerWebApi.Common;
+using ResumeManagerWebApi.Controllers.Dtos;
 using ResumeManagerWebApi.Services.Documents;
 
 namespace ResumeManagerWebApi.Controllers
@@ -17,8 +18,8 @@ namespace ResumeManagerWebApi.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllDocuments()
+        [HttpGet("{userEmail}")]
+        public async Task<IActionResult> GetAllDocuments(string userEmail)
         {
             var validationError = ValidateRequestHeader(Request.Headers);
 
@@ -27,8 +28,19 @@ namespace ResumeManagerWebApi.Controllers
                 return Unauthorized(validationError);
             }
 
-            var documentNames = await _documentService.GetAllDocuments();
-            return Ok(documentNames);
+            var documentBo = await _documentService.GetAllDocuments(userEmail);
+
+            var responseDto = new GetAllDocumentsResponseDto
+            {
+                Documents = documentBo.Select(bo => new DocumentDto
+                {
+                    BlobName = bo.BlobName,
+                    FileName = bo.FileName,
+                    Size = bo.Size
+                })
+            };
+
+            return Ok(responseDto);
         }
 
         [HttpPost("upload")]

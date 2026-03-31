@@ -1,5 +1,5 @@
 ﻿using ResumeManagerWebApi.Data.Repositories;
-using ResumeManagerWebApi.Dtos;
+using ResumeManagerWebApi.Services.Documents.Bo;
 using ResumeManagerWebApi.Services.Documents.Responses;
 
 namespace ResumeManagerWebApi.Services.Documents
@@ -7,19 +7,41 @@ namespace ResumeManagerWebApi.Services.Documents
     public class DocumentsService : IDocumentsService
     {
         private readonly IDocumentsRepository _documentRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IDocumentsValidationService _documentsValidationService;
 
         public DocumentsService(
             IDocumentsRepository documentRepository,
+            IUserRepository userRepository,
             IDocumentsValidationService documentsValidationService)
         {
             _documentRepository = documentRepository;
+            _userRepository = userRepository;
             _documentsValidationService = documentsValidationService;
         }
 
-        public async Task<IEnumerable<Document>> GetAllDocuments()
+        public async Task<IEnumerable<DocumentBo>> GetAllDocuments(string userEmail)
         {
-            return await _documentRepository.GetAllDocuments();
+            var documentBos = new List<DocumentBo>();
+
+            var user = await _userRepository.Get(userEmail);
+            var userDocuments = await _documentRepository.GetUserDocuments(user.Id);
+
+            foreach (var userDocument in userDocuments)
+            {
+                var blobSize = (await _documentRepository.GetBlobProperties(userDocument.BlobName)).ContentLength;
+
+                documentBos.Add(new DocumentBo
+                {
+                    Id = userDocument.Id,
+                    UserId = userDocument.UserId,
+                    BlobName = userDocument.BlobName,
+                    FileName = userDocument.FileName,
+                    Size = blobSize
+                });
+            }
+
+            return documentBos;
         }
 
         public async Task<UploadDocumentResponse> Upload(IFormFile file)

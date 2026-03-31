@@ -4,10 +4,10 @@ namespace ResumeManagerWebApi.Data.Repositories
 {
     public interface IUserRepository
     {
-        User Get(string email);
+        Task<User> Get(string email);
 
-        User Create(string email);
+        Task<User> Create(string email);
 
-        void Delete(string email);
+        Task Delete(string email);
     }
 }

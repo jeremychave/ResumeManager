@@ -1,11 +1,11 @@
-﻿using ResumeManagerWebApi.Dtos;
+﻿using ResumeManagerWebApi.Services.Documents.Bo;
 using ResumeManagerWebApi.Services.Documents.Responses;
 
 namespace ResumeManagerWebApi.Services.Documents
 {
     public interface IDocumentsService
     {
-        public Task<IEnumerable<Document>> GetAllDocuments();
+        public Task<IEnumerable<DocumentBo>> GetAllDocuments(string userEmail);
 
         public Task<UploadDocumentResponse> Upload(IFormFile file);
 

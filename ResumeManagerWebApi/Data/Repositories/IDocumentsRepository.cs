@@ -1,10 +1,14 @@
-﻿using ResumeManagerWebApi.Dtos;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using ResumeManagerWebApi.Data.Entities;
 
 namespace ResumeManagerWebApi.Data.Repositories
 {
     public interface IDocumentsRepository
     {
-        public Task<IEnumerable<Document>> GetAllDocuments();
+        public Task<IEnumerable<UserDocument>> GetUserDocuments(Guid userId);
+
+        public Task<BlobProperties> GetBlobProperties(string blobName);
 
         public Task<string> Upload(IFormFile file);
 
