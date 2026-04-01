@@ -33,18 +33,18 @@
                 <td>@r.Size</td>
                 <td>
                     <div>
+                        <form asp-controller="Documents" asp-action="Download" method="get" style="display:inline;">
+                            <input type="hidden" name="fileName" value="@r.FileName" />
+                            <button type="submit" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-download"></i>
+                            </button>
+                        </form>
+
                         <form asp-controller="Documents" asp-action="Delete" method="post" style="display:inline;">
                             <input type="hidden" name="blobName" value="@r.BlobName" />
                             <button type="submit" class="btn btn-danger btn-sm"
                                     onclick="return confirm('Delete this document?');">
-                                Delete
-                            </button>
-                        </form>
-
-                        <form asp-controller="Documents" asp-action="Download" method="get" style="display:inline;">
-                            <input type="hidden" name="fileName" value="@r.FileName" />
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                Download
+                                <i class="bi bi-trash"></i>
                             </button>
                         </form>
                     </div>
