@@ -62,9 +62,18 @@ namespace ResumeManagerWebApi.Services.Documents
                 };
             }
 
-            var blobName = await _documentRepository.UploadBlob(file);
             var user = await _userRepository.Get(userEmail);
-            await _documentRepository.AddUserDocument(user.Id, blobName, file.FileName);
+            var existingUserDocument = (await _documentRepository.GetUserDocuments(user.Id)).FirstOrDefault(ud => ud.FileName == file.Name);
+
+            if (existingUserDocument == null)
+            {
+                var blobName = await _documentRepository.UploadBlob(file);
+                await _documentRepository.AddUserDocument(user.Id, blobName, file.FileName);
+            }
+            else
+            {
+                await _documentRepository.UploadBlob(file, existingUserDocument.BlobName);
+            }
 
             return new UploadDocumentResponse
             {

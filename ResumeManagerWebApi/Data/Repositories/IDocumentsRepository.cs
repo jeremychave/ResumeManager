@@ -10,7 +10,7 @@ namespace ResumeManagerWebApi.Data.Repositories
         public Task DeleteUserDocument(Guid userId, string blobName);
 
         public Task<BlobProperties> GetBlobProperties(string blobName);
-        public Task<string> UploadBlob(IFormFile file);
+        public Task<string> UploadBlob(IFormFile file, string? existingBlobName = null);
         public Task<Stream> Download(string blobName);
         public Task<bool> DeleteBlob(string blobName);
     }

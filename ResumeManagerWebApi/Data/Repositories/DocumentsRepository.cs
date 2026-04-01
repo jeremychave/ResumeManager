@@ -65,15 +65,16 @@ namespace ResumeManagerWebApi.Data.Repositories
             return await _container.GetBlobClient(blobName).GetPropertiesAsync();
         }
 
-        public async Task<string> UploadBlob(IFormFile file)
+        public async Task<string> UploadBlob(IFormFile file, string? existingBlobName = null)
         {
-            var blob = _container.GetBlobClient(Guid.NewGuid() + Path.GetExtension(file.FileName));
+            var blobName = existingBlobName ?? Guid.NewGuid() + Path.GetExtension(file.FileName);
+            var blob = _container.GetBlobClient(blobName);
 
             using (var stream = file.OpenReadStream()) 
             {
                 await blob.UploadAsync(
                 stream,
-                new BlobHttpHeaders { ContentType = file.ContentType });
+                overwrite: existingBlobName != null);
             };
 
             return blob.Name;
