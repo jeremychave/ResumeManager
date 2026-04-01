@@ -30,7 +30,7 @@
         {
             <tr>
                 <td>@r.FileName</td>
-                <td>@r.Size</td>
+                <td>@Html.DisplayFor(m => @r.Size, "BytesToMBytes")</td>
                 <td>
                     <div>
                         <form asp-controller="Documents" asp-action="Download" method="get" style="display:inline;">
