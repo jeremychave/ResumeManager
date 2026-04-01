@@ -1,6 +1,7 @@
 ﻿using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.EntityFrameworkCore;
 using ResumeManagerWebApi.Data.Entities;
 
 namespace ResumeManagerWebApi.Data.Repositories
@@ -27,6 +28,14 @@ namespace ResumeManagerWebApi.Data.Repositories
             return _context.UserDocument
                 .Where(ud => ud.UserId == userId)
                 .ToList();
+        }
+
+        public async Task<UserDocument?> GetUserDocument(string userEmail, string fileName)
+        {
+            return await _context.Users
+                .Where(u => u.Email == userEmail)
+                .SelectMany(u => u.Documents)
+                .FirstOrDefaultAsync(ud => ud.FileName == fileName);
         }
 
         public async Task<UserDocument> AddUserDocument(Guid userId, string blobName, string fileName)

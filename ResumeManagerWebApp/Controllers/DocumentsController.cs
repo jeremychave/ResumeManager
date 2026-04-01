@@ -67,5 +67,20 @@ namespace ResumeManagerWebApp.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Download(string fileName)
+        {
+            var userEmail = User.FindFirst("preferred_username")?.Value;
+            var response = await _apiService.DownloadDocumentAsync(fileName, userEmail);
+
+            if (response != null)
+            {
+                return File(response, "application/octet-stream", fileName);
+            }
+
+            TempData["Error"] = $"Failed to download the document : {fileName}";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

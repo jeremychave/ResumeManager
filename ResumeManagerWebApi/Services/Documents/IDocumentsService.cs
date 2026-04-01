@@ -9,7 +9,7 @@ namespace ResumeManagerWebApi.Services.Documents
 
         public Task<UploadDocumentResponse> Upload(IFormFile file, string userEmail);
 
-        public Task<Stream> Download(string blobName);
+        public Task<DownloadDocumentResponse> DownloadDocument(string fileName, string userEmail);
 
         public Task<DeleteDocumentResponse> Delete(string blobName, string userEmail);
     }

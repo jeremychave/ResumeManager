@@ -1,4 +1,6 @@
-﻿using ResumeManagerWebApp.Common;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
+using ResumeManagerWebApp.Common;
 using ResumeManagerWebApp.DTOs.Document;
 using ResumeManagerWebApp.Models;
 
@@ -60,9 +62,29 @@ namespace ResumeManagerWebApp.Services
 
         public async Task<DeleteDocumentResponseDto> DeleteDocumentAsync(string blobName, string userEmail)
         {
-            var response = await _httpClient.DeleteAsync($"api/documents/{blobName}/{userEmail}");
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"api/documents/{blobName}/{userEmail}");
+
+            this.AddHttpHeader(request, userEmail);
+
+            var response = await _httpClient.SendAsync(request);
 
             return await response.Content.ReadFromJsonAsync<DeleteDocumentResponseDto>();
+        }
+
+        public async Task<Stream?> DownloadDocumentAsync(string fileName, string userEmail)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"api/documents/download/{fileName}/{userEmail}");
+
+            this.AddHttpHeader(request, userEmail);
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await response.Content.ReadAsStreamAsync();
         }
 
         private void AddHttpHeader(HttpRequestMessage request, string userEmail)

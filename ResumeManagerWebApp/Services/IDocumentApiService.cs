@@ -1,4 +1,5 @@
-﻿using ResumeManagerWebApp.DTOs.Document;
+﻿using Microsoft.AspNetCore.Mvc;
+using ResumeManagerWebApp.DTOs.Document;
 using ResumeManagerWebApp.Models;
 
 namespace ResumeManagerWebApp.Services
@@ -10,5 +11,7 @@ namespace ResumeManagerWebApp.Services
         Task<UploadDocumentResponseDto> UploadDocumentAsync(IFormFile file, string userEmail);
 
         Task<DeleteDocumentResponseDto> DeleteDocumentAsync(string blobName, string userEmail);
+
+        Task<Stream?> DownloadDocumentAsync(string fileName, string userEmail);
     }
 }

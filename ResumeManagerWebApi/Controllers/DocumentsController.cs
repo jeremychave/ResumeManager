@@ -65,16 +65,36 @@ namespace ResumeManagerWebApi.Controllers
             }
         }
 
-        [HttpGet("download/{blobName}")]
-        public async Task<IActionResult> Download(string blobName)
+        [HttpGet("download/{fileName}/{userEmail}")]
+        public async Task<IActionResult> Download(string fileName, string userEmail)
         {
-            var stream = await _documentService.Download(blobName);
-            return File(stream, "application/octet-stream", blobName);
+            var validationError = ValidateRequestHeader(Request.Headers);
+
+            if (!string.IsNullOrEmpty(validationError))
+            {
+                return Unauthorized(validationError);
+            }
+
+            var response = await _documentService.DownloadDocument(fileName, userEmail);
+
+            if (!response.Success || response.Content == null) 
+            {
+                return BadRequest(response.Error);
+            }
+
+            return File(response.Content, "application/octet-stream", fileName);
         }
 
         [HttpDelete("{blobName}/{userEmail}")]
         public async Task<IActionResult> Delete(string blobName, string userEmail)
         {
+            var validationError = ValidateRequestHeader(Request.Headers);
+
+            if (!string.IsNullOrEmpty(validationError))
+            {
+                return Unauthorized(validationError);
+            }
+
             var deleteResponse = await _documentService.Delete(blobName, userEmail);
 
             if (deleteResponse.Success)

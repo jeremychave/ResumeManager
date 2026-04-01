@@ -26,7 +26,7 @@ namespace ResumeManagerWebApi.Services.Documents
 
             var user = await _userRepository.Get(userEmail);
 
-            if(user != null)
+            if (user != null)
             {
                 var userDocuments = await _documentRepository.GetUserDocuments(user.Id);
 
@@ -83,9 +83,28 @@ namespace ResumeManagerWebApi.Services.Documents
             };
         }
 
-        public async Task<Stream> Download(string blobName)
+        public async Task<DownloadDocumentResponse> DownloadDocument(string fileName, string userEmail)
         {
-            return await _documentRepository.Download(blobName);
+            var userDocument = await _documentRepository.GetUserDocument(userEmail, fileName);
+
+            if (userDocument == null)
+            {
+                return new DownloadDocumentResponse
+                {
+                    Success = false,
+                    Content = null,
+                    Error = "Document not found"
+                };
+            }
+
+            Stream content = await _documentRepository.Download(userDocument.BlobName);
+
+            return new DownloadDocumentResponse
+            {
+                Success = true,
+                Content = content,
+                Error = null
+            };
         }
 
         public async Task<DeleteDocumentResponse> Delete(string blobName, string userEmail)

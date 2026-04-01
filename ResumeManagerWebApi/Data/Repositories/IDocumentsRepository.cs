@@ -6,6 +6,7 @@ namespace ResumeManagerWebApi.Data.Repositories
     public interface IDocumentsRepository
     {
         public Task<IEnumerable<UserDocument>> GetUserDocuments(Guid userId);
+        public Task<UserDocument?> GetUserDocument(string userEmail, string fileName);
         public Task<UserDocument> AddUserDocument(Guid userId, string blobName, string fileName);
         public Task DeleteUserDocument(Guid userId, string blobName);
 
