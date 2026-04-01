@@ -63,7 +63,7 @@ namespace ResumeManagerWebApi.Services.Documents
             }
 
             var user = await _userRepository.Get(userEmail);
-            var existingUserDocument = (await _documentRepository.GetUserDocuments(user.Id)).FirstOrDefault(ud => ud.FileName == file.Name);
+            var existingUserDocument = (await _documentRepository.GetUserDocuments(user.Id)).FirstOrDefault(ud => ud.FileName == file.FileName);
 
             if (existingUserDocument == null)
             {
