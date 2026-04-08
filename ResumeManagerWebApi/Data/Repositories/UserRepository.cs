@@ -11,7 +11,7 @@ namespace ResumeManagerWebApi.Data.Repositories
             _context = context;
         }
 
-        public async Task<User> Get(string email)
+        public async Task<User?> Get(string email)
         {
             return _context.Users.FirstOrDefault(u => u.Email == email);
         }
