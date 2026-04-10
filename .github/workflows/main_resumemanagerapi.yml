@@ -27,6 +27,9 @@ jobs:
 
       - name: Build
         run: dotnet build ./ResumeManagerWebApi/ResumeManagerWebApi.sln --configuration Release
+      
+      - name: Test
+        run: dotnet test ./ResumeManagerWebApi/ResumeManagerWebApi.sln --configuration Release --no-build
 
       - name: Publish
         run: dotnet publish ./ResumeManagerWebApi/ResumeManagerWebApi.sln -c Release -o "${{env.DOTNET_ROOT}}/myapi"
