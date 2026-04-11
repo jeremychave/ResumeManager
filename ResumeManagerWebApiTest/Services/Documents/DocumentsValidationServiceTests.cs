@@ -127,11 +127,5 @@ namespace ResumeManagerWebApiTest.Services.Documents
                 Assert.That(actualResponse.Errors.Count, Is.EqualTo(0));
             }
         }
-
-        [Test]
-        public void FailingTest_ToTestFailingPipeline()
-        {
-            Assert.That(false, Is.True);
-        }
     }
 }
