@@ -1,0 +1,81 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - WebApp/**
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: 'WebApp/WebApp.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - checkout: self
+
+    - task: UseDotNet@2
+      inputs:
+        version: '10.0.x'
+
+    - script: dotnet build WebApp/WebApp.sln --configuration Release
+      displayName: Build
+
+    - script: dotnet publish WebApp/WebApp.sln -c Release -o $(Build.ArtifactStagingDirectory)
+      displayName: Publish
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: 'webapp'
+
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - deployment: DeployWebApp
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: 'webapp'
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'YOUR-SERVICE-CONNECTION'
+              appType: 'webApp'
+              appName: 'ResumeManager'
+              package: '$(Pipeline.Workspace)/webapp'
+
+# steps:
+# - task: NuGetToolInstaller@1
+
+# - task: NuGetCommand@2
+#   inputs:
+#     restoreSolution: '$(solution)'
+
+# - task: VSBuild@1
+#   inputs:
+#     solution: '$(solution)'
+#     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
+#     platform: '$(buildPlatform)'
+#     configuration: '$(buildConfiguration)'
+
+# - task: VSTest@2
+#   inputs:
+#     platform: '$(buildPlatform)'
+#     configuration: '$(buildConfiguration)'
