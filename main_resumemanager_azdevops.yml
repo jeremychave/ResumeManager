@@ -56,7 +56,7 @@ stages:
 
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: 'YOUR-SERVICE-CONNECTION'
+              azureSubscription: 'Azure-ResumeManager'
               appType: 'webApp'
               appName: 'ResumeManager'
               package: '$(Pipeline.Workspace)/webapp'
