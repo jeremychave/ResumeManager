@@ -9,15 +9,10 @@ trigger:
       - main
   paths:
     include:
-      - WebApp/**
+      - ResumeManagerWebApp/**
 
 pool:
   vmImage: 'windows-latest'
-
-variables:
-  solution: 'WebApp/WebApp.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
 
 stages:
 - stage: Build
