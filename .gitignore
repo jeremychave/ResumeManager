@@ -2,19 +2,18 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/ResumeManagerWebApp/.vs/ResumeManagerWebApp.slnx
-/ResumeManagerWebApp/bin/Debug/net10.0
+/.vs
+
+/ResumeManagerWebApp/.vs
+/ResumeManagerWebApp/bin
 /ResumeManagerWebApp/obj
 /ResumeManagerWebApp/ResumeManagerWebApp.csproj.user
-/ResumeManagerWebApp/.vs
-/ResumeManagerWebApp/bin/Debug/net10.0
-/ResumeManagerWebApp/obj
 /ResumeManagerWebApp/ResumeManagerWebApp.slnLaunch.user
 
 /ResumeManagerWebApi/.vs
-/ResumeManagerWebApi/bin/Debug/net10.0
+/ResumeManagerWebApi/bin
 /ResumeManagerWebApi/obj
 
 /ResumeManagerWebApiTest/.vs
-/ResumeManagerWebApiTest/bin/Debug/net10.0
+/ResumeManagerWebApiTest/bin
 /ResumeManagerWebApiTest/obj
