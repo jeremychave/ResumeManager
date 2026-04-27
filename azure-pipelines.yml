@@ -1,0 +1,97 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - ResumeManagerWebApi/**
+
+pool:
+  vmImage: 'windows-latest'
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - checkout: self
+
+    - task: UseDotNet@2
+      inputs:
+        version: '10.0.x'
+
+    - script: dotnet build ResumeManagerWebApi/ResumeManagerWebApi.sln --configuration Release
+      displayName: Build
+
+    - script: dotnet test .ResumeManagerWebApi/ResumeManagerWebApi.sln --configuration Release --no-build
+      displayName: Test
+
+    - script: dotnet publish ResumeManagerWebApi/ResumeManagerWebApi.sln -c Release -o $(Build.ArtifactStagingDirectory)
+      displayName: Publish
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: 'webapi'
+
+- stage: UpdateDatabase
+  dependsOn: Build
+  jobs:
+  - job: UpdateDatabaseJob
+    displayName: "Apply EF Core Migrations"
+    pool:
+      vmImage: 'windows-latest'
+
+      steps:
+        - checkout: self
+
+        - task: UseDotNet@2
+          inputs:
+            version: '10.0.x'
+
+        - script: dotnet tool install --global dotnet-ef
+          displayName: "Install EF Core CLI"
+
+        - script: dotnet restore ./ResumeManagerWebApi/ResumeManagerWebApi.sln
+          displayName: "Restore solution"
+
+        - task: AzureCLI@2
+          displayName: "Login to Azure"
+          inputs:
+            azureSubscription: 'Azure-ResumeManager'
+            scriptType: ps
+            scriptLocation: inlineScript
+            inlineScript: |
+              echo "Logged in with service connection"
+
+        - script: |
+            cd ResumeManagerWebApi
+            dotnet ef database update
+          displayName: "Apply EF Core migrations"
+          env:
+            ConnectionStrings__DefaultConnection: $(AZURE_SQL_CONNECTION_STRING_RESUMEMANAGER)
+
+- stage: Deploy
+  dependsOn: Build
+  jobs:
+  - deployment: DeployWebApp
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: 'webapi'
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Azure-ResumeManager'
+              appType: 'webApp'
+              appName: 'ResumeManagerAPI'
+              package: '$(Pipeline.Workspace)/webapi'
