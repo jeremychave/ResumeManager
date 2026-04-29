@@ -45,6 +45,7 @@ builder.Services.Configure<OpenIdConnectOptions>(
     });
 
 var app = builder.Build();
+app.MapGet("/", () => Results.Ok("OK"));
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
