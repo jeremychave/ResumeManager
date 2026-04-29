@@ -37,13 +37,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Login to ACR
-        uses: azure/docker-login@v1
+      - name: Login to Azure
+        uses: azure/login@v2
         with:
-          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
           client-id: ${{ secrets.AZURE_CLIENT_ID_RESUMEMANAGER_GITHUBACTIONS }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID_RESUMEMANAGER_GITHUBACTIONS }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_1ADEE08A220C475B8ADCB5CCD4C53F79 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_103DE73A1D674EFB92B9CF94A1848FEF }}
+
+      - name: Login to ACR
+        run: az acr login --name ${{ secrets.ACR_NAME }}
 
       - name: Build Docker image
         run: |
