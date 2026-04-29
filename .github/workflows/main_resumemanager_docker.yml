@@ -49,7 +49,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/resumemanagerwebapp:latest ./ResumeManagerWebApp
+          docker build -f ./ResumeManagerWebApp/prod.dockerfile -t ${{ secrets.ACR_LOGIN_SERVER }}/resumemanagerwebapp:latest ./ResumeManagerWebApp
 
       - name: Push Docker image
         run: |
