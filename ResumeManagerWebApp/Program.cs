@@ -45,7 +45,6 @@ builder.Services.Configure<OpenIdConnectOptions>(
     });
 
 var app = builder.Build();
-app.MapGet("/healthz", () => Results.Ok("OK"));
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
