@@ -46,16 +46,18 @@ builder.Services.Configure<OpenIdConnectOptions>(
     });
 
 var app = builder.Build();
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
 });
+app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseStaticFiles();
+app.UseRouting();
 
 app.MapDefaultControllerRoute();
 
