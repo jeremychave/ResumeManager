@@ -47,10 +47,17 @@ builder.Services.Configure<OpenIdConnectOptions>(
 
 var app = builder.Build();
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+var forwardOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
-});
+};
+
+// très important : on vide les listes, sinon le middleware ignore Azure
+forwardOptions.KnownIPNetworks.Clear();
+forwardOptions.KnownProxies.Clear();
+
+app.UseForwardedHeaders(forwardOptions);
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
