@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Identity.Web;
 using ResumeManagerWebApp.Services;
 
@@ -46,21 +45,6 @@ builder.Services.Configure<OpenIdConnectOptions>(
     });
 
 var app = builder.Build();
-
-var forwardOptions = new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedProto,
-
-    // IMPORTANT : ne pas toucher au PathBase, Host, etc.
-    RequireHeaderSymmetry = false,
-    ForwardLimit = 1
-};
-
-// très important : on vide les listes, sinon le middleware ignore Azure
-forwardOptions.KnownIPNetworks.Clear();
-forwardOptions.KnownProxies.Clear();
-
-app.UseForwardedHeaders(forwardOptions);
 
 app.UseHttpsRedirection();
 
