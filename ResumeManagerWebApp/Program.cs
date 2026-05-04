@@ -49,7 +49,11 @@ var app = builder.Build();
 
 var forwardOptions = new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto,
+
+    // IMPORTANT : ne pas toucher au PathBase, Host, etc.
+    RequireHeaderSymmetry = false,
+    ForwardLimit = 1
 };
 
 // très important : on vide les listes, sinon le middleware ignore Azure
