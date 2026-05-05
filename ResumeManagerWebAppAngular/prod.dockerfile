@@ -19,7 +19,9 @@ FROM nginx:1.27-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copier les fichiers buildés Angular
+RUN ls -R /app/dist
 COPY --from=build /app/dist/ResumeManagerWebAppAngular /usr/share/nginx/html
+RUN ls -R /usr/share/nginx/html
 
 # Azure App Service Container écoute sur 8080
 EXPOSE 8080
