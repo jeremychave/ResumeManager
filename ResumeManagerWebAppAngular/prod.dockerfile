@@ -10,7 +10,7 @@ RUN npm ci
 COPY . .
 
 # Build Angular en mode prod
-RUN npm run build --configuration production
+RUN npm run build:prod
 
 # Étape 2 : image finale NGINX
 FROM nginx:1.27-alpine
