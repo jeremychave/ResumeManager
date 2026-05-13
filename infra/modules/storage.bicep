@@ -6,7 +6,6 @@ resource storage 'Microsoft.Storage/storageAccounts@2025-06-01' = {
   location: location
   sku: {
     name: 'Standard_LRS'
-    tier: 'Standard'
   }
   kind: 'StorageV2'
   properties: {

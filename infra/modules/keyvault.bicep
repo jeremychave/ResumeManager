@@ -7,7 +7,7 @@ resource kv 'Microsoft.KeyVault/vaults@2025-05-01' = {
   properties: {
     sku: {
       family: 'A'
-      name: 'Standard'
+      name: 'standard'
     }
     tenantId: subscription().tenantId
     networkAcls: {
