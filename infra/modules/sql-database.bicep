@@ -18,3 +18,5 @@ resource db 'Microsoft.Sql/servers/databases@2024-11-01-preview' = {
     minCapacity: json('0.5')
   }
 }
+
+output dbName string = dbName

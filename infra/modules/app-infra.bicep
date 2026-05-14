@@ -1,6 +1,8 @@
 param location string
 param prefix string
 
+param sqlHost string = environment().suffixes.sqlServerHostname
+
 @secure()
 param sqlAdminPassword string = '${newGuid()}-Aa1!'
 
@@ -141,20 +143,26 @@ module plan './appservice-plan.bicep' = {
 //
 // Web Apps
 //
-module webMvc './webapp-mvc.bicep' = {
-  name: 'webMvc'
-  params: {
-    name: '${prefix}-mvc'
-    location: location
-    planId: plan.outputs.id
-  }
-}
-
 module webApi './webapp-api.bicep' = {
   name: 'webApi'
   params: {
     name: '${prefix}-api'
     location: location
     planId: plan.outputs.id
+    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
+    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
+    resumeManagerDbConnectionString: 'Server=tcp:${sqlServer.outputs.name}${sqlHost},1433;Initial Catalog=${sqlDb.outputs.dbName};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication="Active Directory Default";'
+  }
+}
+
+module webMvc './webapp-mvc.bicep' = {
+  name: 'webMvc'
+  params: {
+    name: '${prefix}-mvc'
+    location: location
+    planId: plan.outputs.id
+    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
+    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
+    resumeManagerApiUrl: webApi.outputs.apiUrl
   }
 }
