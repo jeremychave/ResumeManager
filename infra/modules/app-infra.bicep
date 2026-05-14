@@ -149,8 +149,8 @@ module webApi './webapp-api.bicep' = {
     name: '${prefix}-api'
     location: location
     planId: plan.outputs.id
-    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
-    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
+    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
+    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
     resumeManagerDbConnectionString: 'Server=tcp:${sqlServer.outputs.name}${sqlHost},1433;Initial Catalog=${sqlDb.outputs.dbName};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication="Active Directory Default";'
   }
 }
@@ -161,8 +161,8 @@ module webMvc './webapp-mvc.bicep' = {
     name: '${prefix}-mvc'
     location: location
     planId: plan.outputs.id
-    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
-    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
+    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
+    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
     resumeManagerApiUrl: webApi.outputs.apiUrl
   }
 }
