@@ -37,18 +37,32 @@ module sqlDb './sql-database.bicep' = {
 //
 // Key Vault
 //
-module keyvault './keyvault.bicep' = {
-  name: 'kv'
-  params: {
-    name: '${prefix}-kv'
-    location: location
+resource keyvault 'Microsoft.KeyVault/vaults@2025-05-01' = {
+  name: '${prefix}-kv'
+  location: location
+  properties: {
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    tenantId: subscription().tenantId
+    networkAcls: {
+      bypass: 'None'
+      defaultAction: 'Allow'
+      ipRules: []
+      virtualNetworkRules: []
+    }
+    accessPolicies: []
+    enableRbacAuthorization: true
+    publicNetworkAccess: 'Enabled'
   }
 }
+
 
 module kvSecretApiKey './keyvault-secrets.bicep' = {
   name: 'kvSecretApiKey'
   params: {
-    vaultName: keyvault.outputs.name
+    vaultName: keyvault.name
     secretName: 'resume-manager-api-key'
     secretValue: kvSecretApiKeyValue
   }
@@ -57,7 +71,7 @@ module kvSecretApiKey './keyvault-secrets.bicep' = {
 module kvSecretSignature './keyvault-secrets.bicep' = {
   name: 'kvSecretSignature'
   params: {
-    vaultName: keyvault.outputs.name
+    vaultName: keyvault.name
     secretName: 'resume-manager-signature-secret'
     secretValue: kvSecretSignatureValue
   }
@@ -66,7 +80,7 @@ module kvSecretSignature './keyvault-secrets.bicep' = {
 module kvSecretSqlAdmin './keyvault-secrets.bicep' = {
   name: 'kvSecretSqlAdmin'
   params: {
-    vaultName: keyvault.outputs.name
+    vaultName: keyvault.name
     secretName: 'sql-admin'
     secretValue: sqlServer.outputs.sqlAdmin
   }
@@ -75,7 +89,7 @@ module kvSecretSqlAdmin './keyvault-secrets.bicep' = {
 module kvSecretSqlAdminPassword './keyvault-secrets.bicep' = {
   name: 'kvSecretSqlAdminPassword'
   params: {
-    vaultName: keyvault.outputs.name
+    vaultName: keyvault.name
     secretName: 'sql-admin-password'
     secretValue: sqlAdminPassword
   }
@@ -164,5 +178,32 @@ module webMvc './webapp-mvc.bicep' = {
     appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
     appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
     resumeManagerApiUrl: webApi.outputs.apiUrl
+  }
+}
+
+//
+// Role Assignments
+//
+resource kvSecretsUserApi 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(webApi.name, 'kv-secrets-user')
+  scope: keyvault
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User guid
+    )
+    principalId: webApi.outputs.principalId
+  }
+}
+
+resource kvSecretsUserMvc 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(webMvc.name, 'kv-secrets-user')
+  scope: keyvault
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User guid
+    )
+    principalId: webMvc.outputs.principalId
   }
 }

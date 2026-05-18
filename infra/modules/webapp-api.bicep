@@ -42,3 +42,4 @@ resource app 'Microsoft.Web/sites@2024-11-01' = {
 }
 
 output apiUrl string = 'https://${app.properties.defaultHostName}/'
+output principalId string = app.identity.principalId

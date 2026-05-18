@@ -37,3 +37,5 @@ resource app 'Microsoft.Web/sites@2024-11-01' = {
     }
   }
 }
+
+output principalId string = app.identity.principalId
