@@ -24,8 +24,8 @@ jobs:
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID_RESUMEMANAGER_GITHUBACTIONS }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID_RESUMEMANAGER_GITHUBACTIONS }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_103DE73A1D674EFB92B9CF94A1848FEF }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Login to ACR
         run: az acr login --name ${{ secrets.ACR_NAME }}
@@ -49,8 +49,8 @@ jobs:
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID_RESUMEMANAGER_GITHUBACTIONS }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID_RESUMEMANAGER_GITHUBACTIONS }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_103DE73A1D674EFB92B9CF94A1848FEF }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy container to App Service
         uses: azure/webapps-deploy@v3

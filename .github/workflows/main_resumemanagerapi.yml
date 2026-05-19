@@ -65,8 +65,8 @@ jobs:
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID_RESUMEMANAGER_GITHUBACTIONS }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID_RESUMEMANAGER_GITHUBACTIONS }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_103DE73A1D674EFB92B9CF94A1848FEF }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Apply EF Core migrations
         env: 
@@ -92,8 +92,8 @@ jobs:
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C4822219C5C14FE88F8EDAF50B84AD7C }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_9CB8D43848414F3DBD5EA5115CC3ED44 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_103DE73A1D674EFB92B9CF94A1848FEF }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
