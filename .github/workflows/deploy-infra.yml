@@ -32,4 +32,41 @@ jobs:
         az deployment sub create \
           --location canadacentral \
           --template-file infra/main.bicep \
-          --parameters resourceGroupName=${{ github.event.inputs.resourceGroupName }}
+          --parameters resourceGroupName=${{ github.event.inputs.resourceGroupName }} \
+          --query "properties.outputs" > outputs.json
+
+    - name: Upload outputs
+      uses: actions/upload-artifact@v4
+      with:
+        name: infra-outputs
+        path: outputs.json
+  
+  create-github-secrets:
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download outputs
+      uses: actions/download-artifact@v4
+      with:
+        name: infra-outputs
+
+    - name: Read outputs
+      run: |
+        echo "MVC_IDENTITY_CLIENT_ID=$(jq -r '.webMvcIdentityClientId.value' outputs.json)" >> $GITHUB_ENV
+
+    - name: Normalize resource group name
+      run: |
+        RG_UPPER=$(echo "${{ github.event.inputs.resourceGroupName }}" | tr '[:lower:]' '[:upper:]')
+        echo "RG_UPPER=$RG_UPPER" >> $GITHUB_ENV
+
+    - name: Build secret name for MVC Identity
+      run: |
+        SECRET_NAME="AZURE_${RG_UPPER}_IDENTITY_MVC_CLIENT_ID"
+        echo "SECRET_NAME=$SECRET_NAME" >> $GITHUB_ENV
+
+    - name: Create GitHub Secret for MVC Identity
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh secret set "$SECRET_NAME" --body "$MVC_IDENTITY_CLIENT_ID"

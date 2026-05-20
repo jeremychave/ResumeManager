@@ -207,3 +207,8 @@ resource kvSecretsUserMvc 'Microsoft.Authorization/roleAssignments@2022-04-01' =
     principalId: webMvc.outputs.principalId
   }
 }
+
+output webMvcIdentityClientId string = identityMvc.outputs.clientId
+output webMvcIdentityPrincipalId string = identityMvc.outputs.principalId
+output webApiIdentityClientId string = identityApi.outputs.clientId
+output webApiIdentityPrincipalId string = identityApi.outputs.principalId
