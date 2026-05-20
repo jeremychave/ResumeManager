@@ -72,4 +72,4 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh secret set "$SECRET_NAME" --body "$MVC_IDENTITY_CLIENT_ID"
+        gh secret set "$SECRET_NAME" --env infra --body "$MVC_IDENTITY_CLIENT_ID"
