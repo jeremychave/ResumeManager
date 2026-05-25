@@ -54,6 +54,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       
       - name: Get MVC identity clientId
+        id: get-mvc-id
         run: |
           CLIENT_ID=$(az identity show \
             --name resumemanager-GitHubAction-mvc \
@@ -65,7 +66,7 @@ jobs:
       - name: Login to Azure with mvc-identity
         uses: azure/login@v2
         with:
-          client-id: $CLIENT_ID
+          client-id: ${{ steps.get-mvc-id.outputs.clientId }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
