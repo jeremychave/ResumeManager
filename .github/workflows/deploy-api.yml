@@ -1,0 +1,120 @@
+name: Deploy API
+
+on:
+  workflow_dispatch:
+    inputs:
+      resourceGroupName:
+        description: "Name of the ressource group of the API webapp"
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build
+        run: dotnet build ./ResumeManagerWebApi/ResumeManagerWebApi.sln --configuration Release
+      
+      - name: Test
+        run: dotnet test ./ResumeManagerWebApi/ResumeManagerWebApi.sln --configuration Release --no-build
+
+      - name: Publish
+        run: dotnet publish ./ResumeManagerWebApi/ResumeManagerWebApi.sln -c Release -o "${{env.DOTNET_ROOT}}/myapi"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-api
+          path: ${{env.DOTNET_ROOT}}/myapi
+
+  # updateDatabase:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Set up .NET
+  #       uses: actions/setup-dotnet@v4
+  #       with:
+  #         dotnet-version: '10.0.x'
+
+  #     - name: Install EF Core CLI
+  #       run: dotnet tool install --global dotnet-ef
+
+  #     - name: Restore
+  #       run: dotnet restore ./ResumeManagerWebApi/ResumeManagerWebApi.sln
+
+  #     - name: Login to Azure
+  #       uses: azure/login@v2
+  #       with:
+  #         client-id: ${{ secrets.AZURE_CLIENT_ID_RESUMEMANAGER_GITHUBACTIONS }}
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  #     - name: Apply EF Core migrations
+  #       env: 
+  #         ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING_RESUMEMANAGER }}
+  #       run: |
+  #         cd ResumeManagerWebApi
+  #         dotnet ef database update
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-api
+      
+      - name: Login to Azure with infra-identity
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_INFRA_IDENTITY_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get API identity clientId
+        id: get-api-id
+        run: |
+          CLIENT_ID=$(az identity show \
+            --name resumemanager-GitHubAction-api \
+            --resource-group ${{ github.event.inputs.resourceGroupName }} \
+            --query "clientId" -o tsv)
+
+          echo "clientId=$CLIENT_ID" >> $GITHUB_OUTPUT
+      
+      - name: Login to Azure with api-identity
+        uses: azure/login@v2
+        with:
+          client-id: ${{ steps.get-api-id.outputs.clientId }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'resumemanager-api'
+          ResourceGroupName: ${{ github.event.inputs.resourceGroupName }}
+          slot-name: 'Production'
+          package: .
+          
