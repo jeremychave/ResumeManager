@@ -157,29 +157,100 @@ module plan './appservice-plan.bicep' = {
 //
 // Web Apps
 //
-module webApi './webapp-api.bicep' = {
-  name: 'webApi'
-  params: {
-    name: '${prefix}-api'
-    location: location
-    planId: plan.outputs.id
-    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
-    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
-    resumeManagerDbConnectionString: 'Server=tcp:${sqlServer.outputs.name}${sqlHost},1433;Initial Catalog=${sqlDb.outputs.dbName};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication="Active Directory Default";'
+//module webApi './webapp-api.bicep' = {
+//  name: 'webApi'
+//  params: {
+//    name: '${prefix}-api'
+//    location: location
+//    planId: plan.outputs.id
+//    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
+//    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
+//    resumeManagerDbConnectionString: 'Server=tcp:${sqlServer.outputs.name}${sqlHost},1433;Initial Catalog=${sqlDb.outputs.dbName};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication="Active Directory Default";'
+//  }
+//}
+
+resource webApi 'Microsoft.Web/sites@2024-11-01' = {
+  name: '${prefix}-api'
+  location: location
+  kind: 'app'
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    enabled: true
+    serverFarmId: plan.outputs.id
+    httpsOnly: false
+    siteConfig: {
+      numberOfWorkers: 1
+      alwaysOn: false
+      http20Enabled: true
+      appSettings: [
+        {
+          name: 'ApiSettings__ResumeManagerApiKey'
+          value: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
+        }
+        {
+          name: 'ApiSettings__SignatureSecret'
+          value: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
+        }
+      ]
+      connectionStrings: [
+        {
+          name: 'ResumeManagerDb'
+          type: 'SQLServer'
+          connectionString: 'Server=tcp:${sqlServer.outputs.name}${sqlHost},1433;Initial Catalog=${sqlDb.outputs.dbName};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication="Active Directory Default";'
+        }
+      ]
+    }
   }
 }
 
-module webMvc './webapp-mvc.bicep' = {
-  name: 'webMvc'
-  params: {
-    name: '${prefix}-mvc'
-    location: location
-    planId: plan.outputs.id
-    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
-    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
-    resumeManagerApiUrl: webApi.outputs.apiUrl
+
+//module webMvc './webapp-mvc.bicep' = {
+//  name: 'webMvc'
+//  params: {
+//    name: '${prefix}-mvc'
+//    location: location
+//    planId: plan.outputs.id
+//    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
+//    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
+//    resumeManagerApiUrl: webApi.outputs.apiUrl
+//  }
+//}
+
+resource webMvc 'Microsoft.Web/sites@2024-11-01' = {
+  name: '${prefix}-mvc'
+  location: location
+  kind: 'app'
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    enabled: true
+    serverFarmId: plan.outputs.id
+    httpsOnly: true
+    siteConfig: {
+      numberOfWorkers: 1
+      alwaysOn: false
+      http20Enabled: false
+      appSettings: [
+        {
+          name: 'ApiSettings__ResumeManagerApiKey'
+          value: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
+        }
+        {
+          name: 'ApiSettings__SignatureSecret'
+          value: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
+        }
+        {
+          name: 'ApiSettings:ResumeManagerWebApi'
+          value: 'https://${webApi.properties.defaultHostName}/'
+        }
+      ]
+    }
   }
 }
+
 
 //
 // Role Assignments
@@ -192,7 +263,7 @@ resource kvSecretsUserApi 'Microsoft.Authorization/roleAssignments@2022-04-01' =
       'Microsoft.Authorization/roleDefinitions',
       '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User guid
     )
-    principalId: webApi.outputs.principalId
+    principalId: webApi.identity.principalId
   }
 }
 
@@ -204,7 +275,7 @@ resource kvSecretsUserMvc 'Microsoft.Authorization/roleAssignments@2022-04-01' =
       'Microsoft.Authorization/roleDefinitions',
       '4633458b-17de-408a-b874-0445c86b69e6' // Key Vault Secrets User guid
     )
-    principalId: webMvc.outputs.principalId
+    principalId: webMvc.identity.principalId
   }
 }
 
