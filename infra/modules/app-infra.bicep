@@ -157,17 +157,6 @@ module plan './appservice-plan.bicep' = {
 //
 // Web Apps
 //
-//module webApi './webapp-api.bicep' = {
-//  name: 'webApi'
-//  params: {
-//    name: '${prefix}-api'
-//    location: location
-//    planId: plan.outputs.id
-//    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
-//    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
-//    resumeManagerDbConnectionString: 'Server=tcp:${sqlServer.outputs.name}${sqlHost},1433;Initial Catalog=${sqlDb.outputs.dbName};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication="Active Directory Default";'
-//  }
-//}
 
 resource webApi 'Microsoft.Web/sites@2024-11-01' = {
   name: '${prefix}-api'
@@ -204,19 +193,6 @@ resource webApi 'Microsoft.Web/sites@2024-11-01' = {
     }
   }
 }
-
-
-//module webMvc './webapp-mvc.bicep' = {
-//  name: 'webMvc'
-//  params: {
-//    name: '${prefix}-mvc'
-//    location: location
-//    planId: plan.outputs.id
-//    appSettingResumeManagerApiKey: '@Microsoft.KeyVault(SecretUri=${kvSecretApiKey.outputs.secretUri})'
-//    appSettingSignature: '@Microsoft.KeyVault(SecretUri=${kvSecretSignature.outputs.secretUri})'
-//    resumeManagerApiUrl: webApi.outputs.apiUrl
-//  }
-//}
 
 resource webMvc 'Microsoft.Web/sites@2024-11-01' = {
   name: '${prefix}-mvc'
