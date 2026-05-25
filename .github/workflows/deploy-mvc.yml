@@ -1,0 +1,93 @@
+name: Deploy MVC
+
+on:
+  push:
+    branches:
+      - main
+    paths: 
+      - 'ResumeManagerWebApp/**'
+  workflow_dispatch:
+    inputs:
+      resourceGroupName:
+        description: "Name of the ressource group of the MVC webapp"
+        required: true
+        type: string
+
+env:
+  DEFAULT_RG_NAME: "ResumeManagerProdRG"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build with dotnet
+        run: dotnet build ./ResumeManagerWebApp/ResumeManagerWebApp.slnx --configuration Release
+
+      - name: dotnet publish
+        run: dotnet publish -c Release ./ResumeManagerWebApp/ResumeManagerWebApp.slnx -o "${{env.DOTNET_ROOT}}/myapp"
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      RESOURCE_GROUP_NAME: ${{ github.event.inputs.resourceGroupName || env.DEFAULT_RG_NAME }}
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+      
+      - name: Login to Azure with infra-identity
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_INFRA_IDENTITY_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+      - name: Get MVC identity clientId
+        run: |
+          CLIENT_ID=$(az identity show \
+            --name resumemanager-GitHubAction-mvc \
+            --resource-group $RESOURCE_GROUP_NAME \
+            --query "clientId" -o tsv)
+
+          echo "clientId=$CLIENT_ID" >> $GITHUB_OUTPUT
+      
+      - name: Login to Azure with mvc-identity
+        uses: azure/login@v2
+        with:
+          client-id: $CLIENT_ID
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'resumemanager-mvc'
+          ResourceGroupName: $RESOURCE_GROUP_NAME
+          slot-name: 'Production'
+          package: .
+
+          
+
+
