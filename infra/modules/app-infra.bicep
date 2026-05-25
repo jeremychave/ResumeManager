@@ -208,6 +208,31 @@ resource kvSecretsUserMvc 'Microsoft.Authorization/roleAssignments@2022-04-01' =
   }
 }
 
+resource mvcIdentityWebSiteContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(identityMvc.name, 'web-site-contributor')
+  scope: webMvc
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'de139f84-1756-47ae-9be6-808fbbe84772' // Website Contributor
+    )
+    principalId: identityMvc.outputs.principalId
+  }
+}
+
+resource apiIdentityWebSiteContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(identityApi.name, 'web-site-contributor')
+  scope: webApi
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'de139f84-1756-47ae-9be6-808fbbe84772' // Website Contributor
+    )
+    principalId: identityApi.outputs.principalId
+  }
+}
+
+
 output webMvcIdentityClientId string = identityMvc.outputs.clientId
 output webMvcIdentityPrincipalId string = identityMvc.outputs.principalId
 output webApiIdentityClientId string = identityApi.outputs.clientId
