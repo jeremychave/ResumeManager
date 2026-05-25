@@ -1,20 +1,12 @@
 name: Deploy MVC
 
 on:
-  push:
-    branches:
-      - main
-    paths: 
-      - 'ResumeManagerWebApp/**'
   workflow_dispatch:
     inputs:
       resourceGroupName:
         description: "Name of the ressource group of the MVC webapp"
         required: true
         type: string
-
-env:
-  DEFAULT_RG_NAME: "ResumeManagerProdRG"
 
 jobs:
   build:
@@ -48,8 +40,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    env:
-      RESOURCE_GROUP_NAME: ${{ github.event.inputs.resourceGroupName || env.DEFAULT_RG_NAME }}
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
@@ -67,7 +57,7 @@ jobs:
         run: |
           CLIENT_ID=$(az identity show \
             --name resumemanager-GitHubAction-mvc \
-            --resource-group $RESOURCE_GROUP_NAME \
+            --resource-group ${{ github.event.inputs.resourceGroupName }} \
             --query "clientId" -o tsv)
 
           echo "clientId=$CLIENT_ID" >> $GITHUB_OUTPUT
@@ -84,7 +74,7 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'resumemanager-mvc'
-          ResourceGroupName: $RESOURCE_GROUP_NAME
+          ResourceGroupName: ${{ github.event.inputs.resourceGroupName }}
           slot-name: 'Production'
           package: .
 
