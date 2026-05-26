@@ -15,20 +15,22 @@ param kvSecretSignatureValue string = newGuid()
 //
 // SQL Server + Database
 //
-module sqlServer './sql-server.bicep' = {
-  name: 'sqlServer'
-  params: {
-    name: '${prefix}-sql'
-    location: location
+resource sqlServer 'Microsoft.Sql/servers@2024-11-01-preview' = {
+  name: '${prefix}-sql'
+  location: location
+  properties: {
     administratorLogin: '${prefix}-sqladmin'
-    sqlAdminPassword: sqlAdminPassword
+    administratorLoginPassword: sqlAdminPassword
+    version: '12.0'
+    minimalTlsVersion: '1.2'
+    publicNetworkAccess: 'Enabled'
   }
 }
 
 module sqlDb './sql-database.bicep' = {
   name: 'sqlDb'
   params: {
-    serverName: sqlServer.outputs.name
+    serverName: sqlServer.name
     dbName: '${prefix}db'
     location: location
   }
@@ -82,7 +84,7 @@ module kvSecretSqlAdmin './keyvault-secrets.bicep' = {
   params: {
     vaultName: keyvault.name
     secretName: 'sql-admin'
-    secretValue: sqlServer.outputs.sqlAdmin
+    secretValue: '${prefix}-sqladmin'
   }
 }
 
@@ -98,35 +100,18 @@ module kvSecretSqlAdminPassword './keyvault-secrets.bicep' = {
 //
 // Managed Identities
 //
-module identityMvc './identity.bicep' = {
-  name: 'identityMvc'
+module identityGitHubAction './identity.bicep' = {
+  name: 'identityGitHubAction'
   params: {
-    name: '${prefix}-GitHubAction-mvc'
+    name: '${prefix}-GitHubAction'
     location: location
   }
 }
 
-module identityfederatedcredentialMvc './identity-federated-credential.bicep' = {
-  name: 'identityfederatedcredentialMvc'
+module identityfederatedcredential './identity-federated-credential.bicep' = {
+  name: 'identityfederatedcredential'
   params: {
-    identityName: identityMvc.outputs.name
-    issuer: 'https://token.actions.githubusercontent.com'
-    subject: 'repo:jeremychave/ResumeManager:ref:refs/heads/main'
-  }
-}
-
-module identityApi './identity.bicep' = {
-  name: 'identityApi'
-  params: {
-    name: '${prefix}-GitHubAction-api'
-    location: location
-  }
-}
-
-module identityfederatedcredentialApi './identity-federated-credential.bicep' = {
-  name: 'identityfederatedcredentialApi'
-  params: {
-    identityName: identityApi.outputs.name
+    identityName: identityGitHubAction.outputs.name
     issuer: 'https://token.actions.githubusercontent.com'
     subject: 'repo:jeremychave/ResumeManager:ref:refs/heads/main'
   }
@@ -157,7 +142,6 @@ module plan './appservice-plan.bicep' = {
 //
 // Web Apps
 //
-
 resource webApi 'Microsoft.Web/sites@2024-11-01' = {
   name: '${prefix}-api'
   location: location
@@ -187,7 +171,7 @@ resource webApi 'Microsoft.Web/sites@2024-11-01' = {
         {
           name: 'ResumeManagerDb'
           type: 'SQLServer'
-          connectionString: 'Server=tcp:${sqlServer.outputs.name}${sqlHost},1433;Initial Catalog=${sqlDb.outputs.dbName};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication="Active Directory Default";'
+          connectionString: 'Server=tcp:${sqlServer.name}${sqlHost},1433;Initial Catalog=${sqlDb.outputs.dbName};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication="Active Directory Default";'
         }
       ]
     }
@@ -256,29 +240,40 @@ resource kvSecretsUserMvc 'Microsoft.Authorization/roleAssignments@2022-04-01' =
 }
 
 resource mvcIdentityWebSiteContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(identityMvc.name, 'web-site-contributor')
+  name: guid(identityGitHubAction.name, 'web-site-contributor')
   scope: webMvc
   properties: {
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
       'de139f84-1756-47ae-9be6-808fbbe84772' // Website Contributor
     )
-    principalId: identityMvc.outputs.principalId
+    principalId: identityGitHubAction.outputs.principalId
   }
 }
 
 resource apiIdentityWebSiteContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(identityApi.name, 'web-site-contributor')
+  name: guid(identityGitHubAction.name, 'web-site-contributor')
   scope: webApi
   properties: {
     roleDefinitionId: subscriptionResourceId(
       'Microsoft.Authorization/roleDefinitions',
       'de139f84-1756-47ae-9be6-808fbbe84772' // Website Contributor
     )
-    principalId: identityApi.outputs.principalId
+    principalId: identityGitHubAction.outputs.principalId
   }
 }
 
+resource dbIdentitySqlDbContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(identityGitHubAction.name, 'sql-db-contributor')
+  scope: sqlServer
+  properties: {
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '9b7fa17d-e63e-47b0-bb0a-15c516ac86ec' // SQL DB Contributor
+    )
+    principalId: identityGitHubAction.outputs.principalId
+  }
+}
 
 output webMvcIdentityClientId string = identityMvc.outputs.clientId
 output webMvcIdentityPrincipalId string = identityMvc.outputs.principalId
