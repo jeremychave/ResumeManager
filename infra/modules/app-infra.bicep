@@ -274,3 +274,68 @@ resource dbIdentitySqlDbContributor 'Microsoft.Authorization/roleAssignments@202
     principalId: identityGitHubAction.outputs.principalId
   }
 }
+
+//
+// Create User Db
+//
+resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+  name: 'create-sql-aad-user'
+  location: location
+  kind: 'AzureCLI'
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${identityGitHubAction.outputs.id}': {}
+    }
+  }
+  properties: {
+    azCliVersion: '2.53.0'
+    timeout: 'PT30M'
+    retentionInterval: 'P1D'
+
+    environmentVariables: [
+      {
+        name: 'SQL_SERVER'
+        value: sqlServer.name
+      }
+      {
+        name: 'SQL_DB'
+        value: '${sqlDb.outputs.dbName}'
+      }
+      {
+        name: 'SQL_ADMIN'
+        value: '${prefix}-sqladmin'
+      }
+      {
+        name: 'SQL_PASSWORD'
+        secureValue: sqlAdminPassword
+      }
+      {
+        name: 'IDENTITY_NAME'
+        value: '${identityGitHubAction.outputs.name}'
+      }
+    ]
+
+    scriptContent: '''
+      # Install sqlcmd
+      apt-get update
+      apt-get install -y mssql-tools unixodbc-dev
+
+      export PATH="$PATH:/opt/mssql-tools/bin"
+
+      echo "Connexion SQL..."
+      sqlcmd -S "$SQL_SERVER.database.windows.net" -d "$SQL_DB" -U "$SQL_ADMIN" -P "$SQL_PASSWORD" -Q "
+        IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$IDENTITY_NAME')
+        BEGIN
+          CREATE USER [$IDENTITY_NAME] FROM EXTERNAL PROVIDER;
+        END
+
+        ALTER ROLE db_datareader ADD MEMBER [$IDENTITY_NAME];
+        ALTER ROLE db_datawriter ADD MEMBER [$IDENTITY_NAME];
+        ALTER ROLE db_ddladmin ADD MEMBER [$IDENTITY_NAME];
+      "
+    '''
+  }
+}
+
+
