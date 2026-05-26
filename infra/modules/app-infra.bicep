@@ -240,7 +240,7 @@ resource kvSecretsUserMvc 'Microsoft.Authorization/roleAssignments@2022-04-01' =
 }
 
 resource mvcIdentityWebSiteContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(identityGitHubAction.name, 'web-site-contributor')
+  name: guid(identityGitHubAction.name, 'web-site-contributor-mvc')
   scope: webMvc
   properties: {
     roleDefinitionId: subscriptionResourceId(
@@ -252,7 +252,7 @@ resource mvcIdentityWebSiteContributor 'Microsoft.Authorization/roleAssignments@
 }
 
 resource apiIdentityWebSiteContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(identityGitHubAction.name, 'web-site-contributor')
+  name: guid(identityGitHubAction.name, 'web-site-contributor-api')
   scope: webApi
   properties: {
     roleDefinitionId: subscriptionResourceId(
