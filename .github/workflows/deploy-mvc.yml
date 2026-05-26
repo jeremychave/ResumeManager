@@ -53,11 +53,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       
-      - name: Get MVC identity clientId
-        id: get-mvc-id
+      - name: Get identity-GitHubAction clientId
+        id: get-identity-clientId
         run: |
           CLIENT_ID=$(az identity show \
-            --name resumemanager-GitHubAction-mvc \
+            --name resumemanager-GitHubAction \
             --resource-group ${{ github.event.inputs.resourceGroupName }} \
             --query "clientId" -o tsv)
 
@@ -66,7 +66,7 @@ jobs:
       - name: Login to Azure with mvc-identity
         uses: azure/login@v2
         with:
-          client-id: ${{ steps.get-mvc-id.outputs.clientId }}
+          client-id: ${{ steps.get-identity-clientId.outputs.clientId }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 

@@ -19,8 +19,3 @@ module appInfra './modules/app-infra.bicep' = {
     prefix: prefix
   }
 }
-
-output webMvcIdentityClientId string = appInfra.outputs.webMvcIdentityClientId
-output webMvcIdentityPrincipalId string = appInfra.outputs.webMvcIdentityPrincipalId
-output webApiIdentityClientId string = appInfra.outputs.webApiIdentityClientId
-output webApiIdentityPrincipalId string = appInfra.outputs.webApiIdentityPrincipalId

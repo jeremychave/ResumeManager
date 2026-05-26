@@ -274,8 +274,3 @@ resource dbIdentitySqlDbContributor 'Microsoft.Authorization/roleAssignments@202
     principalId: identityGitHubAction.outputs.principalId
   }
 }
-
-output webMvcIdentityClientId string = identityMvc.outputs.clientId
-output webMvcIdentityPrincipalId string = identityMvc.outputs.principalId
-output webApiIdentityClientId string = identityApi.outputs.clientId
-output webApiIdentityPrincipalId string = identityApi.outputs.principalId

@@ -92,11 +92,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Get API identity clientId
-        id: get-api-id
+      - name: Get identity-GitHubAction clientId
+        id: get-identity-clientId
         run: |
           CLIENT_ID=$(az identity show \
-            --name resumemanager-GitHubAction-api \
+            --name resumemanager-GitHubAction \
             --resource-group ${{ github.event.inputs.resourceGroupName }} \
             --query "clientId" -o tsv)
 
@@ -105,7 +105,7 @@ jobs:
       - name: Login to Azure with api-identity
         uses: azure/login@v2
         with:
-          client-id: ${{ steps.get-api-id.outputs.clientId }}
+          client-id: ${{ steps.get-identity-clientId.outputs.clientId }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 

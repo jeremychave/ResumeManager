@@ -32,11 +32,4 @@ jobs:
         az deployment sub create \
           --location canadacentral \
           --template-file infra/main.bicep \
-          --parameters resourceGroupName=${{ github.event.inputs.resourceGroupName }} \
-          --query "properties.outputs" > outputs.json
-
-    - name: Upload outputs
-      uses: actions/upload-artifact@v4
-      with:
-        name: infra-outputs
-        path: outputs.json
+          --parameters resourceGroupName=${{ github.event.inputs.resourceGroupName }}
