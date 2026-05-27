@@ -326,7 +326,9 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
 
         ALTER ROLE db_datareader ADD MEMBER [$env:IDENTITY_NAME];
         ALTER ROLE db_datawriter ADD MEMBER [$env:IDENTITY_NAME];
-        ALTER ROLE db_ddladmin ADD MEMBER [$env:IDENTITY_NAME]; "@'''
+        ALTER ROLE db_ddladmin ADD MEMBER [$env:IDENTITY_NAME];
+      "@
+    '''
   }
 }
 
