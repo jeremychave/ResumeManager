@@ -278,61 +278,44 @@ resource dbIdentitySqlDbContributor 'Microsoft.Authorization/roleAssignments@202
 resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: 'create-sql-aad-user'
   location: location
-  kind: 'AzureCLI'
+  kind: 'AzurePowerShell'
   identity: {
     type: 'UserAssigned'
-    userAssignedIdentities: {      
-      '${identityGitHubAction.id}': {}
+    userAssignedIdentities: {
+      identityGitHubAction.id: {}
     }
   }
   properties: {
-    azCliVersion: '2.53.0'
+    azPowerShellVersion: '10.0'
     timeout: 'PT30M'
     retentionInterval: 'P1D'
 
     environmentVariables: [
-      {
-        name: 'SQL_SERVER'
-        value: sqlServer.name
-      }
-      {
-        name: 'SQL_DB'
-        value: sqlDb.outputs.dbName
-      }
-      {
-        name: 'SQL_ADMIN'
-        value: '${prefix}-sqladmin'
-      }
-      {
-        name: 'SQL_PASSWORD'
-        secureValue: sqlAdminPassword
-      }
-      {
-        name: 'IDENTITY_NAME'
-        value: identityGitHubAction.name
-      }
+      { name: 'SQL_SERVER'; value: sqlServer.name }
+      { name: 'SQL_DB'; value: sqlDb.outputs.dbName }
+      { name: 'SQL_ADMIN'; value: '${prefix}-sqladmin' }
+      { name: 'SQL_PASSWORD'; secureValue: sqlAdminPassword }
+      { name: 'IDENTITY_NAME'; value: identityGitHubAction.outputs.name }
     ]
 
     scriptContent: '''
-      echo "Exécution du SQL via Azure CLI..."
+      $connectionString = "Server=tcp:$env:SQL_SERVER.database.windows.net,1433;Initial Catalog=$env:SQL_DB;User ID=$env:SQL_ADMIN;Password=$env:SQL_PASSWORD;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
-      az sql db query \
-        --server $SQL_SERVER \
-        --name $SQL_DB \
-        --admin-user $SQL_ADMIN \
-        --admin-password $SQL_PASSWORD \
-        --query-text "
-          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$IDENTITY_NAME')
-          BEGIN
-            CREATE USER [$IDENTITY_NAME] FROM EXTERNAL PROVIDER;
-          END;
+      Write-Output "Connecting to SQL..."
 
-          ALTER ROLE db_datareader ADD MEMBER [$IDENTITY_NAME];
-          ALTER ROLE db_datawriter ADD MEMBER [$IDENTITY_NAME];
-          ALTER ROLE db_ddladmin ADD MEMBER [$IDENTITY_NAME];
-        "
+      Invoke-Sqlcmd -ConnectionString $connectionString -Query @"
+        IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$env:IDENTITY_NAME')
+        BEGIN
+          CREATE USER [$env:IDENTITY_NAME] FROM EXTERNAL PROVIDER;
+        END;
+
+        ALTER ROLE db_datareader ADD MEMBER [$env:IDENTITY_NAME];
+        ALTER ROLE db_datawriter ADD MEMBER [$env:IDENTITY_NAME];
+        ALTER ROLE db_ddladmin ADD MEMBER [$env:IDENTITY_NAME];
+      "@
     '''
   }
 }
+
 
 
