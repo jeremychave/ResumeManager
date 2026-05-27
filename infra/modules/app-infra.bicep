@@ -317,8 +317,8 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       $connectionString = "Server=tcp:$env:SQL_SERVER.database.windows.net,1433;Initial Catalog=$env:SQL_DB;User ID=$env:SQL_ADMIN;Password=$env:SQL_PASSWORD;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
       Write-Output "Connecting to SQL..."
-
-      Invoke-Sqlcmd -ConnectionString $connectionString -Query @"
+      
+      $Sql = "
         IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$env:IDENTITY_NAME')
         BEGIN
           CREATE USER [$env:IDENTITY_NAME] FROM EXTERNAL PROVIDER;
@@ -327,7 +327,9 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         ALTER ROLE db_datareader ADD MEMBER [$env:IDENTITY_NAME];
         ALTER ROLE db_datawriter ADD MEMBER [$env:IDENTITY_NAME];
         ALTER ROLE db_ddladmin ADD MEMBER [$env:IDENTITY_NAME];
-      "@
+      "
+
+      Invoke-Sqlcmd -ConnectionString $connectionString -Query $Sql
     '''
   }
 }
