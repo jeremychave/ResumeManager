@@ -297,7 +297,7 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       }
       {
         name: 'SQL_DB'
-        value: '${sqlDb.outputs.dbName}'
+        value: sqlDb.outputs.dbName
       }
       {
         name: 'SQL_ADMIN'
@@ -309,28 +309,28 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       }
       {
         name: 'IDENTITY_NAME'
-        value: '${identityGitHubAction.name}'
+        value: identityGitHubAction.name
       }
     ]
 
     scriptContent: '''
-      # Install sqlcmd
-      apt-get update
-      apt-get install -y mssql-tools unixodbc-dev
+      echo "Exécution du SQL via Azure CLI..."
 
-      export PATH="$PATH:/opt/mssql-tools/bin"
+      az sql db query \
+        --server $SQL_SERVER \
+        --name $SQL_DB \
+        --admin-user $SQL_ADMIN \
+        --admin-password $SQL_PASSWORD \
+        --query-text "
+          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$IDENTITY_NAME')
+          BEGIN
+            CREATE USER [$IDENTITY_NAME] FROM EXTERNAL PROVIDER;
+          END;
 
-      echo "Connexion SQL..."
-      sqlcmd -S "$SQL_SERVER.database.windows.net" -d "$SQL_DB" -U "$SQL_ADMIN" -P "$SQL_PASSWORD" -Q "
-        IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$IDENTITY_NAME')
-        BEGIN
-          CREATE USER [$IDENTITY_NAME] FROM EXTERNAL PROVIDER;
-        END
-
-        ALTER ROLE db_datareader ADD MEMBER [$IDENTITY_NAME];
-        ALTER ROLE db_datawriter ADD MEMBER [$IDENTITY_NAME];
-        ALTER ROLE db_ddladmin ADD MEMBER [$IDENTITY_NAME];
-      "
+          ALTER ROLE db_datareader ADD MEMBER [$IDENTITY_NAME];
+          ALTER ROLE db_datawriter ADD MEMBER [$IDENTITY_NAME];
+          ALTER ROLE db_ddladmin ADD MEMBER [$IDENTITY_NAME];
+        "
     '''
   }
 }
