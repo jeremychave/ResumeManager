@@ -295,7 +295,7 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       { name: 'SQL_DB'; value: sqlDb.outputs.dbName }
       { name: 'SQL_ADMIN'; value: '${prefix}-sqladmin' }
       { name: 'SQL_PASSWORD'; secureValue: sqlAdminPassword }
-      { name: 'IDENTITY_NAME'; value: identityGitHubAction.name }
+      { name: 'IDENTITY_NAME'; value: identityGitHubAction.outputs.name }
     ]
 
     scriptContent: '''
@@ -316,3 +316,6 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
     '''
   }
 }
+
+
+
