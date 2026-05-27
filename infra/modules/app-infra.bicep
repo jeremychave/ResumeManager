@@ -100,18 +100,15 @@ module kvSecretSqlAdminPassword './keyvault-secrets.bicep' = {
 //
 // Managed Identities
 //
-module identityGitHubAction './identity.bicep' = {
-  name: 'identityGitHubAction'
-  params: {
-    name: '${prefix}-GitHubAction'
-    location: location
-  }
+resource identityGitHubAction 'Microsoft.ManagedIdentity/userAssignedIdentities@2025-01-31-preview' = {
+  name: '${prefix}-GitHubAction'
+  location: location
 }
 
 module identityfederatedcredential './identity-federated-credential.bicep' = {
   name: 'identityfederatedcredential'
   params: {
-    identityName: identityGitHubAction.outputs.name
+    identityName: identityGitHubAction.name
     issuer: 'https://token.actions.githubusercontent.com'
     subject: 'repo:jeremychave/ResumeManager:ref:refs/heads/main'
   }
@@ -247,7 +244,7 @@ resource mvcIdentityWebSiteContributor 'Microsoft.Authorization/roleAssignments@
       'Microsoft.Authorization/roleDefinitions',
       'de139f84-1756-47ae-9be6-808fbbe84772' // Website Contributor
     )
-    principalId: identityGitHubAction.outputs.principalId
+    principalId: identityGitHubAction.properties.principalId
   }
 }
 
@@ -259,7 +256,7 @@ resource apiIdentityWebSiteContributor 'Microsoft.Authorization/roleAssignments@
       'Microsoft.Authorization/roleDefinitions',
       'de139f84-1756-47ae-9be6-808fbbe84772' // Website Contributor
     )
-    principalId: identityGitHubAction.outputs.principalId
+    principalId: identityGitHubAction.properties.principalId
   }
 }
 
@@ -271,7 +268,7 @@ resource dbIdentitySqlDbContributor 'Microsoft.Authorization/roleAssignments@202
       'Microsoft.Authorization/roleDefinitions',
       '9b7fa17d-e63e-47b0-bb0a-15c516ac86ec' // SQL DB Contributor
     )
-    principalId: identityGitHubAction.outputs.principalId
+    principalId: identityGitHubAction.properties.principalId
   }
 }
 
@@ -285,7 +282,7 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      '${identityGitHubAction.outputs.id}': {}
+      identityGitHubAction.id: {}
     }
   }
   properties: {
@@ -312,7 +309,7 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
       }
       {
         name: 'IDENTITY_NAME'
-        value: '${identityGitHubAction.outputs.name}'
+        value: '${identityGitHubAction.name}'
       }
     ]
 
