@@ -281,8 +281,8 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   kind: 'AzureCLI'
   identity: {
     type: 'UserAssigned'
-    userAssignedIdentities: {
-      identityGitHubAction.id: {}
+    userAssignedIdentities: {      
+      '${identityGitHubAction.id}': {}
     }
   }
   properties: {
