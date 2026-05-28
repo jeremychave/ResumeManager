@@ -17,6 +17,7 @@ param kvSecretSignatureValue string = newGuid()
 //
 resource infraIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
   name: 'infra-identity'
+  scope: resourceGroup('rg-infra')
 }
 
 //
