@@ -13,6 +13,13 @@ param kvSecretApiKeyValue string = newGuid()
 param kvSecretSignatureValue string = newGuid()
 
 //
+// Get existing infra-identity informations
+//
+resource infraIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: 'infra-identity'
+}
+
+//
 // SQL Server + Database
 //
 resource sqlServer 'Microsoft.Sql/servers@2024-11-01-preview' = {
@@ -24,6 +31,16 @@ resource sqlServer 'Microsoft.Sql/servers@2024-11-01-preview' = {
     version: '12.0'
     minimalTlsVersion: '1.2'
     publicNetworkAccess: 'Enabled'
+  }
+}
+
+resource sqlAdmin 'Microsoft.Sql/servers/administrators@2022-05-01-preview' = {
+  name: '${sqlServer.name}/activeDirectory'
+  properties: {
+    administratorType: 'ActiveDirectory'
+    login: infraIdentity.name
+    sid: infraIdentity.properties.principalId
+    tenantId: subscription().tenantId
   }
 }
 
@@ -282,7 +299,7 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {      
-      '${identityGitHubAction.id}': {}
+      '${infraIdentity.id}': {}
     }
   }
   properties: {
@@ -300,38 +317,40 @@ resource sqlUserScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
         value: sqlDb.outputs.dbName
       }
       {
-        name: 'SQL_ADMIN'
-        value: '${prefix}-sqladmin'
-      }
-      {
-        name: 'SQL_PASSWORD'
-        secureValue: sqlAdminPassword
-      }
-      {
-        name: 'IDENTITY_NAME'
+        name: 'USER_NAME'
         value: identityGitHubAction.name
       }
     ]
 
     scriptContent: '''
-      $connectionString = "Server=tcp:$env:SQL_SERVER.database.windows.net,1433;Initial Catalog=$env:SQL_DB;User ID=$env:SQL_ADMIN;Password=$env:SQL_PASSWORD;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+      Write-Output "Authenticating with Managed Identity..."
+      Connect-AzAccount -Identity | Out-Null
 
-      Write-Output "Connecting to SQL..."
-      
+      $server = "$env:SQL_SERVER.database.windows.net"
+      $database = $env:SQL_DB
+
+      Write-Output "Getting AAD access token for Azure SQL..."
+      $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
+
       $Sql = "
-        IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$env:IDENTITY_NAME')
+        IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$env:USER_NAME')
         BEGIN
-          CREATE USER [$env:IDENTITY_NAME] FROM EXTERNAL PROVIDER;
+          CREATE USER [$env:USER_NAME] FROM EXTERNAL PROVIDER;
         END;
 
-        ALTER ROLE db_datareader ADD MEMBER [$env:IDENTITY_NAME];
-        ALTER ROLE db_datawriter ADD MEMBER [$env:IDENTITY_NAME];
-        ALTER ROLE db_ddladmin ADD MEMBER [$env:IDENTITY_NAME];
+        ALTER ROLE db_datareader ADD MEMBER [$env:USER_NAME];
+        ALTER ROLE db_datawriter ADD MEMBER [$env:USER_NAME];
+        ALTER ROLE db_ddladmin ADD MEMBER [$env:USER_NAME];
       "
 
-      Invoke-Sqlcmd -ConnectionString $connectionString -Query $Sql
+      Write-Output "Executing SQL query..."
+      Invoke-Sqlcmd `
+        -ServerInstance $server `
+        -Database $database `
+        -AccessToken $token `
+        -Query $Sql
+
+      Write-Output "SQL initialization completed successfully."
     '''
   }
 }
-
-
