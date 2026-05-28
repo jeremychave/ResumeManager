@@ -19,3 +19,7 @@ module appInfra './modules/app-infra.bicep' = {
     prefix: prefix
   }
 }
+
+output sqlServerName string = appInfra.outputs.sqlServerName
+output sqlDatabaseName string = appInfra.outputs.sqlDatabaseName
+output identityName string = appInfra.outputs.identityName
