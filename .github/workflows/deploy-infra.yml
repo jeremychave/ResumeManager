@@ -53,17 +53,17 @@ jobs:
         pwsh -Command "Install-Module SqlServer -Force -Scope CurrentUser"
 
     - name: Create AAD SQL User
+      shell: pwsh
       run: |
-        pwsh -Command "
-          $server = ${{ env.SQL_SERVER_NAME }}
-          $database = ${{ env.SQL_DATABASE_NAME }}
-          $identityName = ${{ env.IDENTITY_NAME }}
+          $server = "${{ env.SQL_SERVER_NAME }}"
+          $database = "${{ env.SQL_DATABASE_NAME }}"
+          $identityName = "${{ env.IDENTITY_NAME }}"
 
-          Write-Host 'Getting AAD token...'
-          $token = (Get-AzAccessToken -ResourceUrl 'https://database.windows.net').Token
+          Write-Host "Getting AAD token..."
+          $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
 
-          Write-Host 'Executing SQL...'
-          $sql = \"
+          Write-Host "Executing SQL..."
+          $sql = "
             IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityName')
             BEGIN
                 CREATE USER [$identityName] FROM EXTERNAL PROVIDER;
@@ -72,11 +72,10 @@ jobs:
             ALTER ROLE db_datareader ADD MEMBER [$identityName];
             ALTER ROLE db_datawriter ADD MEMBER [$identityName];
             ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
-          \"
+          "
 
           Invoke-Sqlcmd `
-            -ServerInstance \"$server.database.windows.net\" `
-            -Database \"$database\" `
+            -ServerInstance "$server.database.windows.net" `
+            -Database $database `
             -AccessToken $token `
             -Query $sql
-        "
