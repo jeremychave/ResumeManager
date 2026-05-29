@@ -54,6 +54,12 @@ jobs:
         echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
         source ~/.bashrc
 
+    - name: Re-login to Azure (refresh token)
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_INFRA_IDENTITY_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Create AAD SQL User
       shell: bash
