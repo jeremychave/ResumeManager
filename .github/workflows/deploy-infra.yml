@@ -47,11 +47,6 @@ jobs:
         echo "SQL_DATABASE_NAME=$(jq -r '.sqlDatabaseName.value' outputs.json)" >> $GITHUB_ENV
         echo "IDENTITY_NAME=$(jq -r '.identityName.value' outputs.json)" >> $GITHUB_ENV
 
-    - name: Install dotnet-sqlcmd
-      run: |
-        dotnet tool install -g dotnet-sqlcmd
-        echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-
     - name: Re-login to Azure (refresh token)
       uses: azure/login@v2
       with:
@@ -59,31 +54,27 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     
-    - name: Get AAD token
-      id: token
-      shell: pwsh
-      run: |
-        $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
-        echo "TOKEN=$token" >> $GITHUB_ENV
-
     - name: Create AAD SQL User
       shell: bash
       run: |
+        # Token AAD
+        TOKEN=$(az account get-access-token --resource https://database.windows.net --query accessToken -o tsv)
+
         SQL="
         IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '${IDENTITY_NAME}')
         BEGIN
             CREATE USER [${IDENTITY_NAME}] FROM EXTERNAL PROVIDER;
         END;
-    
+
         ALTER ROLE db_datareader ADD MEMBER [${IDENTITY_NAME}];
         ALTER ROLE db_datawriter ADD MEMBER [${IDENTITY_NAME}];
         ALTER ROLE db_ddladmin ADD MEMBER [${IDENTITY_NAME}];
         "
-    
-        dotnet-sqlcmd \
-          --server "${SQL_SERVER_NAME}.database.windows.net" \
-          --database "${SQL_DATABASE_NAME}" \
+
+        az sql db execute \
+          --server "${SQL_SERVER_NAME}" \
+          --name "${SQL_DATABASE_NAME}" \
           --access-token "$TOKEN" \
-          --query "$SQL"
+          --command "$SQL"
 
 
