@@ -33,15 +33,20 @@ jobs:
           --location canadacentral \
           --template-file infra/main.bicep \
           --parameters resourceGroupName=${{ github.event.inputs.resourceGroupName }}
-    
+
     - name: Get deployment outputs
       id: outputs
       run: |
-        outputs=$(az deployment sub show \
-          --name $(az deployment sub list --query "[0].name" -o tsv) \
-          --query "properties.outputs" -o json)
+        DEPLOYMENT_NAME=$(az deployment sub list --query "[0].name" -o tsv)
 
-        echo "outputs=$outputs" >> $GITHUB_OUTPUT
+        az deployment sub show \
+          --name $DEPLOYMENT_NAME \
+          --query "properties.outputs" -o json > outputs.json
+
+        echo "SQL_SERVER_NAME=$(jq -r '.sqlServerName.value' outputs.json)" >> $GITHUB_ENV
+        echo "SQL_DATABASE_NAME=$(jq -r '.sqlDatabaseName.value' outputs.json)" >> $GITHUB_ENV
+        echo "IDENTITY_NAME=$(jq -r '.identityName.value' outputs.json)" >> $GITHUB_ENV
+
     
     - name: Install SqlServer PowerShell module
       run: |
@@ -50,11 +55,9 @@ jobs:
     - name: Create AAD SQL User
       run: |
         pwsh -Command "
-          # Récupération des outputs
-          $outputs = ${{ steps.outputs.outputs }}
-          $server = $outputs.sqlServerName.value
-          $database = $outputs.sqlDatabaseName.value
-          $identityName = $outputs.identityName.value
+          $server = ${{ env.SQL_SERVER_NAME }}
+          $database = ${{ env.SQL_DATABASE_NAME }}
+          $identityName = ${{ env.IDENTITY_NAME }}
 
           Write-Host 'Getting AAD token...'
           $token = (Get-AzAccessToken -ResourceUrl 'https://database.windows.net').Token
@@ -69,7 +72,7 @@ jobs:
             ALTER ROLE db_datareader ADD MEMBER [$identityName];
             ALTER ROLE db_datawriter ADD MEMBER [$identityName];
             ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
-            \"
+          \"
 
           Invoke-Sqlcmd `
             -ServerInstance \"$server.database.windows.net\" `

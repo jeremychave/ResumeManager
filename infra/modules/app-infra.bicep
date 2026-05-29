@@ -36,7 +36,8 @@ resource sqlServer 'Microsoft.Sql/servers@2024-11-01-preview' = {
 }
 
 resource sqlAdmin 'Microsoft.Sql/servers/administrators@2022-05-01-preview' = {
-  name: '${sqlServer.name}/activeDirectory'
+  name: 'activeDirectory'
+  parent: sqlServer
   properties: {
     administratorType: 'ActiveDirectory'
     login: infraIdentity.name
