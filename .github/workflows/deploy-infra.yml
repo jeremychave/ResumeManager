@@ -47,33 +47,27 @@ jobs:
         echo "SQL_DATABASE_NAME=$(jq -r '.sqlDatabaseName.value' outputs.json)" >> $GITHUB_ENV
         echo "IDENTITY_NAME=$(jq -r '.identityName.value' outputs.json)" >> $GITHUB_ENV
 
-    
-    - name: Install sqlcmd
-      run: |
-        curl -sSL https://aka.ms/sqlcmd-linux | bash
-    
-    - name: Get AAD token
-      id: token
-      shell: pwsh
-      run: |
-        $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
-        echo "TOKEN=$token" >> $GITHUB_ENV
-
     - name: Create AAD SQL User
+      shell: bash
       run: |
-        sqlcmd \
-          --authentication-method accessToken \
-          --access-token "${TOKEN}" \
-          --server "${SQL_SERVER_NAME}.database.windows.net" \
-          --database "${SQL_DATABASE_NAME}" \
-          --query "
-            IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '${IDENTITY_NAME}')
-            BEGIN
-                CREATE USER [${IDENTITY_NAME}] FROM EXTERNAL PROVIDER;
-            END;
-    
-            ALTER ROLE db_datareader ADD MEMBER [${IDENTITY_NAME}];
-            ALTER ROLE db_datawriter ADD MEMBER [${IDENTITY_NAME}];
-            ALTER ROLE db_ddladmin ADD MEMBER [${IDENTITY_NAME}];
-          "
+        # Get access token AAD
+        TOKEN=$(az account get-access-token --resource https://database.windows.net --query accessToken -o tsv)
+
+        SQL="
+        IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '${IDENTITY_NAME}')
+        BEGIN
+            CREATE USER [${IDENTITY_NAME}] FROM EXTERNAL PROVIDER;
+        END;
+
+        ALTER ROLE db_datareader ADD MEMBER [${IDENTITY_NAME}];
+        ALTER ROLE db_datawriter ADD MEMBER [${IDENTITY_NAME}];
+        ALTER ROLE db_ddladmin ADD MEMBER [${IDENTITY_NAME}];
+        "
+
+        az sql db query \
+          --server "${SQL_SERVER_NAME}" \
+          --name "${SQL_DATABASE_NAME}" \
+          --auth-type aad \
+          --access-token "$TOKEN" \
+          --querytext "$SQL"
 
