@@ -79,6 +79,14 @@ jobs:
         Write-Host "Getting AAD token..."
         $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
 
+        Write-Host "Ensuring infraIdentity exists in master..."
+        Invoke-Sqlcmd `
+          -ServerInstance "$server.database.windows.net" `
+          -Database "master" `
+          -AccessToken $token `
+          -Query "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = 'infra-identity')
+                  CREATE USER [infra-identity] FROM EXTERNAL PROVIDER;"
+
         Write-Host "Executing SQL..."
         $sql = "
           IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityName')
