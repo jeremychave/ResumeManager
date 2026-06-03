@@ -65,10 +65,10 @@ jobs:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         enable-AzPSSession: true
 
-    - name: Install new sqlcmd (Go)
+    - name: Install sqlcmd (Go)
       run: |
-        curl -LO https://aka.ms/sqlcmd-linux
-        tar -xvf sqlcmd-linux
+        curl -L -o sqlcmd.tar.gz https://github.com/microsoft/go-sqlcmd/releases/latest/download/sqlcmd-linux-amd64.tar.gz
+        tar -xzf sqlcmd.tar.gz
         sudo mv sqlcmd /usr/local/bin/
         sudo chmod +x /usr/local/bin/sqlcmd
 
