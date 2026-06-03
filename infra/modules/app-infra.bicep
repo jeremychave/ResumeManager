@@ -35,13 +35,24 @@ resource sqlServer 'Microsoft.Sql/servers@2024-11-01-preview' = {
   }
 }
 
+//resource sqlAdmin 'Microsoft.Sql/servers/administrators@2022-05-01-preview' = {
+//  name: 'activeDirectory'
+//  parent: sqlServer
+//  properties: {
+//    administratorType: 'ActiveDirectory'
+//    login: infraIdentity.name
+//    sid: infraIdentity.properties.principalId
+//    tenantId: subscription().tenantId
+//  }
+//}
+
 resource sqlAdmin 'Microsoft.Sql/servers/administrators@2022-05-01-preview' = {
   name: 'activeDirectory'
   parent: sqlServer
   properties: {
     administratorType: 'ActiveDirectory'
-    login: infraIdentity.name
-    sid: infraIdentity.properties.principalId
+    login: 'infra-service-principal'
+    sid: '00bd0e91-c3d1-40ba-bfb4-1df559e0a3f0'
     tenantId: subscription().tenantId
   }
 }
