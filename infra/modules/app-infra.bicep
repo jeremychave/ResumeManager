@@ -57,6 +57,16 @@ resource sqlAdmin 'Microsoft.Sql/servers/administrators@2022-05-01-preview' = {
   }
 }
 
+resource allowAzure 'Microsoft.Sql/servers/firewallRules@2021-02-01-preview' = {
+  name: 'AllowAllAzureIPs'
+  parent: sqlServer
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
+
 module sqlDb './sql-database.bicep' = {
   name: 'sqlDb'
   params: {
