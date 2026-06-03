@@ -67,7 +67,13 @@ jobs:
 
     - name: Install sqlcmd (Go)
       run: |
-        curl -L -o sqlcmd.tar.gz https://github.com/microsoft/go-sqlcmd/releases/latest/download/sqlcmd-linux-amd64.tar.gz
+        # Get the latest release tag
+        TAG=$(curl -s https://api.github.com/repos/microsoft/go-sqlcmd/releases/latest | grep tag_name | cut -d '"' -f 4)
+
+        # Download the correct asset
+        curl -L -o sqlcmd.tar.gz https://github.com/microsoft/go-sqlcmd/releases/download/$TAG/sqlcmd-linux-amd64.tar.gz
+
+        # Extract and install
         tar -xzf sqlcmd.tar.gz
         sudo mv sqlcmd /usr/local/bin/
         sudo chmod +x /usr/local/bin/sqlcmd
