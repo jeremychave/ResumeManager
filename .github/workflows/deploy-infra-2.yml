@@ -65,14 +65,15 @@ jobs:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         enable-AzPSSession: true
 
-    - name: Install sqlcmd
+    - name: Install new sqlcmd (Go)
       run: |
-        curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-        curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
-        sudo apt-get update
-        sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev
-        echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
-        source ~/.bashrc
+        curl -LO https://aka.ms/sqlcmd-linux
+        tar -xvf sqlcmd-linux
+        sudo mv sqlcmd /usr/local/bin/
+        sudo chmod +x /usr/local/bin/sqlcmd
+
+    - name: Check sqlcmd version
+      run: sqlcmd --version
 
     # - name: Install SqlServer module
     #   shell: powershell
