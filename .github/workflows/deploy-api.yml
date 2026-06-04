@@ -111,10 +111,18 @@ jobs:
           cd ResumeManagerWebApi
           dotnet ef dbcontext info
 
+      # - name: Apply EF Core migrations
+      #   run: |
+      #     cd ResumeManagerWebApi
+      #     dotnet ef database update --context ResumeManagerDbContext --startup-project . --project .
+
       - name: Apply EF Core migrations
         run: |
           cd ResumeManagerWebApi
-          dotnet ef database update --context ResumeManagerDbContext --startup-project . --project .
+          dotnet ef database update \
+            --context ResumeManagerDbContext \
+            --connection "Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Access Token;"
+
 
       # - name: Apply EF Core migrations
       #   env:
