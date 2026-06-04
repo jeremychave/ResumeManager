@@ -71,6 +71,10 @@ jobs:
       shell: powershell
       run: Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
 
+    - name: Debug identity objectId
+      run: |
+        echo "identityObjectId = ${{ needs.deploy-infra.outputs.identity_object_id }}"
+
     - name: Create AAD SQL User
       shell: powershell
       run: |
