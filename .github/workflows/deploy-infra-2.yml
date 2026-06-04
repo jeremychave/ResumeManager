@@ -82,11 +82,13 @@ jobs:
         Write-Host "Getting AAD token..."
         $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
 
+        $sid = (New-Guid).Guid.Replace('-', '')
+
         Write-Host "Executing SQL..."
         $sql = "
           IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityObjectId')
           BEGIN
-              CREATE USER [$identityObjectId] WITH SID = 0x<GUID_HEX>, TYPE = E;
+              CREATE USER [$identityObjectId] WITH SID = 0x$sid, TYPE = E;
           END;
 
           ALTER ROLE db_datareader ADD MEMBER [$identityObjectId];
