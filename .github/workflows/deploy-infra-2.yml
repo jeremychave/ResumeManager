@@ -105,6 +105,14 @@ jobs:
           ALTER ROLE db_ddladmin ADD MEMBER [$identityObjectId];
         "
 
+        # 1. MASTER
+        Invoke-Sqlcmd `
+          -ServerInstance "$server.database.windows.net" `
+          -Database "master" `
+          -AccessToken $token `
+          -Query $sql
+
+        # 2. DATABASE
         Invoke-Sqlcmd `
           -ServerInstance "$server.database.windows.net" `
           -Database $database `
