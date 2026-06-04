@@ -114,7 +114,7 @@ jobs:
       - name: Apply EF Core migrations
         run: |
           cd ResumeManagerWebApi
-          dotnet ef database update
+          dotnet ef database update --context ResumeManagerDbContext --startup-project ResumeManagerWebApi --project ResumeManagerWebApi
 
       # - name: Apply EF Core migrations
       #   env:
