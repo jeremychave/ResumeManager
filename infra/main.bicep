@@ -23,3 +23,4 @@ module appInfra './modules/app-infra.bicep' = {
 output sqlServerName string = appInfra.outputs.sqlServerName
 output sqlDatabaseName string = appInfra.outputs.sqlDatabaseName
 output identityName string = appInfra.outputs.identityName
+output identityObjectId string = appInfra.outputs.identityObjectId

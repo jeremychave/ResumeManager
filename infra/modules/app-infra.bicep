@@ -26,9 +26,6 @@ resource infraIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01
 resource sqlServer 'Microsoft.Sql/servers@2024-11-01-preview' = {
   name: '${prefix}-sql'
   location: location
-  identity: {
-    type: 'SystemAssigned'
-  }
   properties: {
     administratorLogin: '${prefix}-sqladmin'
     administratorLoginPassword: sqlAdminPassword
@@ -315,18 +312,7 @@ resource dbIdentitySqlDbContributor 'Microsoft.Authorization/roleAssignments@202
   }
 }
 
-resource sqlServerDirectoryReader 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(sqlServer.id, 'entra-id-directory-reader')
-  scope: tenant()
-  properties: {
-    roleDefinitionId: subscriptionResourceId(
-      'Microsoft.Authorization/roleDefinitions', 
-      'acdd72a7-3385-48ef-bd42-f606fba81ae7' // Entra ID Directory Reader
-    )
-    principalId: sqlServer.identity.principalId
-  }
-}
-
 output sqlServerName string = sqlServer.name
 output sqlDatabaseName string = sqlDb.outputs.dbName
 output identityName string = identityGitHubAction.name
+output identityObjectId string = identityGitHubAction.properties.principalId

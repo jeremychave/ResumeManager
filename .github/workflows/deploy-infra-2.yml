@@ -20,6 +20,7 @@ jobs:
       sql_server_name: ${{ steps.get-deployment-outputs.outputs.SQL_SERVER_NAME }}
       sql_database_name: ${{ steps.get-deployment-outputs.outputs.SQL_DATABASE_NAME }}
       identity_name: ${{ steps.get-deployment-outputs.outputs.IDENTITY_NAME }}
+      identity_object_id: ${{ steps.get-deployment-outputs.outputs.IDENTITY_OBJECT_ID }}
 
     steps:
     - name: Checkout repository
@@ -51,6 +52,7 @@ jobs:
         echo "SQL_SERVER_NAME=$(jq -r '.sqlServerName.value' outputs.json)" >> $GITHUB_OUTPUT
         echo "SQL_DATABASE_NAME=$(jq -r '.sqlDatabaseName.value' outputs.json)" >> $GITHUB_OUTPUT
         echo "IDENTITY_NAME=$(jq -r '.identityName.value' outputs.json)" >> $GITHUB_OUTPUT
+        echo "IDENTITY_OBJECT_ID=$(jq -r '.identityObjectId.value' outputs.json)" >> $GITHUB_OUTPUT
 
   create-sql-user:
     runs-on: windows-latest
@@ -75,6 +77,7 @@ jobs:
         $server = "${{ needs.deploy-infra.outputs.sql_server_name }}"
         $database = "${{ needs.deploy-infra.outputs.sql_database_name }}"
         $identityName = "${{ needs.deploy-infra.outputs.identity_name }}"
+        $identityObjectId = "${{ needs.deploy-infra.outputs.identity_object_id }}"
 
         Write-Host "Getting AAD token..."
         $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
@@ -83,7 +86,8 @@ jobs:
         $sql = "
           IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityName')
           BEGIN
-              CREATE USER [$identityName] FROM EXTERNAL PROVIDER;
+              CREATE USER [$identityObjectId] WITH SID = 0x$((New-Guid).Guid.Replace('-', '')), TYPE = E;
+              ALTER USER [$identityObjectId] WITH NAME = [$identityName];
           END;
 
           ALTER ROLE db_datareader ADD MEMBER [$identityName];
