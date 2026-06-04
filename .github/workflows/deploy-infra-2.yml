@@ -82,7 +82,7 @@ jobs:
         Write-Host "Getting AAD token..."
         $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
 
-        $sid = (New-Guid).Guid.Replace('-', '')
+        $sid = $identityObjectId.Replace('-', '')
 
         Write-Host "Executing SQL..."
         $sql = "
