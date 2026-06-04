@@ -84,15 +84,14 @@ jobs:
 
         Write-Host "Executing SQL..."
         $sql = "
-          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityName')
+          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityObjectId')
           BEGIN
-              CREATE USER [$identityObjectId] WITH SID = 0x$((New-Guid).Guid.Replace('-', '')), TYPE = E;
-              ALTER USER [$identityObjectId] WITH NAME = [$identityName];
+              CREATE USER [$identityObjectId] WITH SID = 0x<GUID_HEX>, TYPE = E;
           END;
 
-          ALTER ROLE db_datareader ADD MEMBER [$identityName];
-          ALTER ROLE db_datawriter ADD MEMBER [$identityName];
-          ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
+          ALTER ROLE db_datareader ADD MEMBER [$identityObjectId];
+          ALTER ROLE db_datawriter ADD MEMBER [$identityObjectId];
+          ALTER ROLE db_ddladmin ADD MEMBER [$identityObjectId];
         "
 
         Invoke-Sqlcmd `
