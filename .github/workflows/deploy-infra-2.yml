@@ -73,7 +73,12 @@ jobs:
 
     - name: Debug identity objectId
       run: |
+        $identityObjectId = "${{ needs.deploy-infra.outputs.identity_object_id }}"
+        $sid = $identityObjectId.Replace('-', '')
         echo "identityObjectId = ${{ needs.deploy-infra.outputs.identity_object_id }}"
+        echo "identityObjectId (variable) = $identityObjectId"
+        echo "sid = $sid"
+        echo "0xsid = 0x$sid"
 
     - name: Create AAD SQL User
       shell: powershell
