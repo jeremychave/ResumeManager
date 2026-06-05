@@ -91,6 +91,23 @@ jobs:
         Write-Host "Getting AAD token..."
         $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
 
+        $ready = $false
+        for ($i = 0; $i -lt 20; $i++) {
+            try {
+                Invoke-Sqlcmd -ServerInstance "$server.database.windows.net" -Database master -AccessToken $token -Query "SELECT 1"
+                $ready = $true
+                break
+            } catch {
+                Write-Host "SQL AAD admin not ready yet. Retrying..."
+                Start-Sleep -Seconds 10
+            }
+        }
+        
+        if (-not $ready) {
+            throw "SQL AAD admin never became ready."
+        }
+
+
         $sid = $identityObjectId.Replace('-', '')
 
         Write-Host "Executing SQL..."
