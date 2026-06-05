@@ -71,15 +71,6 @@ jobs:
       shell: powershell
       run: Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
 
-    - name: Debug identity objectId
-      run: |
-        $identityObjectId = "${{ needs.deploy-infra.outputs.identity_object_id }}"
-        $sid = $identityObjectId.Replace('-', '')
-        echo "identityObjectId = ${{ needs.deploy-infra.outputs.identity_object_id }}"
-        echo "identityObjectId (variable) = $identityObjectId"
-        echo "sid = $sid"
-        echo "0xsid = 0x$sid"
-
     - name: Create AAD SQL User
       shell: powershell
       run: |
@@ -91,34 +82,17 @@ jobs:
         Write-Host "Getting AAD token..."
         $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
 
-        $sid = $identityObjectId.Replace('-', '')
-
         Write-Host "Executing SQL..."
-        $sqlMaster = "
-          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityObjectId')
-          BEGIN
-              CREATE USER [$identityObjectId] WITH SID = 0x$sid, TYPE = E;
-          END;
-        "
         $sqlDatabase = "
-          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityObjectId')
+          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityName')
           BEGIN
-              CREATE USER [$identityObjectId] WITH SID = 0x$sid, TYPE = E;
-          END;
-
-          ALTER ROLE db_datareader ADD MEMBER [$identityObjectId];
-          ALTER ROLE db_datawriter ADD MEMBER [$identityObjectId];
-          ALTER ROLE db_ddladmin ADD MEMBER [$identityObjectId];
+              CREATE USER [$identityName] FROM EXTERNAL PROVIDER;
+              ALTER ROLE db_datareader ADD MEMBER [$identityName];
+              ALTER ROLE db_datawriter ADD MEMBER [$identityName];
+              ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
+          END;          
         "
 
-        # 1. MASTER
-        Invoke-Sqlcmd `
-          -ServerInstance "$server.database.windows.net" `
-          -Database "master" `
-          -AccessToken $token `
-          -Query $sqlMaster
-
-        # 2. DATABASE
         Invoke-Sqlcmd `
           -ServerInstance "$server.database.windows.net" `
           -Database $database `
