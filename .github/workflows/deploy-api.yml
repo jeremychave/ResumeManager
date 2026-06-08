@@ -82,12 +82,12 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Apply EF Core migrations
-        env: 
-          ConnectionStrings__DefaultConnection: "Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30; Authentication=\"Active Directory Managed Identity\";"
-        run: |
-          cd ResumeManagerWebApi
-          dotnet ef database update
+      # - name: Apply EF Core migrations
+      #   env: 
+      #     ConnectionStrings__DefaultConnection: "Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30; Authentication=\"Active Directory Managed Identity\";"
+      #   run: |
+      #     cd ResumeManagerWebApi
+      #     dotnet ef database update
 
       # - name: Apply EF Core migrations
       #   env:
@@ -130,14 +130,23 @@ jobs:
       #       --context ResumeManagerDbContext \
       #       --connection "Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 
+      - name: Get AAD token
+        id: aad-token
+        run: |
+          TOKEN=$(az account get-access-token --resource https://database.windows.net --query accessToken -o tsv)
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
-      # - name: Apply EF Core migrations
-      #   env:
-      #     SQL_ACCESS_TOKEN: ${{ steps.aad-token.outputs.token }}
-      #     ConnectionStrings__ResumeManagerDb: "Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Access Token;"
-      #   run: |
-      #     cd ResumeManagerWebApi
-      #     dotnet ef database update
+      - name: Export SQL access token
+        run: |
+          echo "SQL_ACCESS_TOKEN=${{ steps.aad-token.outputs.token }}" >> $GITHUB_ENV
+      
+      - name: Apply EF Core migrations
+        env:
+          SQL_ACCESS_TOKEN: ${{ steps.aad-token.outputs.token }}
+          ConnectionStrings__ResumeManagerDb: "Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30; Authentication=\"Active Directory Managed Identity\";"
+        run: |
+          cd ResumeManagerWebApi
+          dotnet ef database update
 
   deploy:
     runs-on: ubuntu-latest
