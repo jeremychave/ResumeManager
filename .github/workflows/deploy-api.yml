@@ -139,11 +139,11 @@ jobs:
       - name: Export SQL access token
         run: |
           echo "SQL_ACCESS_TOKEN=${{ steps.aad-token.outputs.token }}" >> $GITHUB_ENV
-      
-      - name: Dump token claims
+
+      - name: Debug EF Factory
         run: |
-          TOKENN=$(az account get-access-token --resource https://database.windows.net --query accessToken -o tsv)
-          echo $TOKENN | jq -R 'split(".") | .[1] | @base64d | fromjson'
+          cd ResumeManagerWebApi
+          dotnet ef dbcontext info --verbose
 
       - name: Apply EF Core migrations
         env:
