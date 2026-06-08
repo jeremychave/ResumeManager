@@ -140,6 +140,11 @@ jobs:
         run: |
           echo "SQL_ACCESS_TOKEN=${{ steps.aad-token.outputs.token }}" >> $GITHUB_ENV
       
+      - name: Dump token claims
+        run: |
+          TOKENN=$(az account get-access-token --resource https://database.windows.net --query accessToken -o tsv)
+          echo $TOKENN | jq -R 'split(".") | .[1] | @base64d | fromjson'
+
       - name: Apply EF Core migrations
         env:
           SQL_ACCESS_TOKEN: ${{ steps.aad-token.outputs.token }}
