@@ -143,7 +143,7 @@ jobs:
       - name: Apply EF Core migrations
         env:
           SQL_ACCESS_TOKEN: ${{ steps.aad-token.outputs.token }}
-          ConnectionStrings__ResumeManagerDb: "Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30; Authentication=\"Active Directory Managed Identity\";"
+          ConnectionStrings__ResumeManagerDb: "Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
         run: |
           cd ResumeManagerWebApi
           dotnet ef database update
