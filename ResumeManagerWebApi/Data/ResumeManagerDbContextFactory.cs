@@ -1,19 +1,21 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using ResumeManagerWebApi.Data;
 
-public class ResumeManagerDbContextFactory : IDesignTimeDbContextFactory<ResumeManagerDbContext>
+namespace ResumeManagerWebApi.Data
 {
-    public ResumeManagerDbContext CreateDbContext(string[] args)
+    public class ResumeManagerDbContextFactory : IDesignTimeDbContextFactory<ResumeManagerDbContext>
     {
-        var optionsBuilder = new DbContextOptionsBuilder<ResumeManagerDbContext>();
+        public ResumeManagerDbContext CreateDbContext(string[] args)
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<ResumeManagerDbContext>();
 
-        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__ResumeManagerDb");
+            var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__ResumeManagerDb");
 
-        optionsBuilder.UseSqlServer(connectionString);
-        optionsBuilder.AddInterceptors(new AccessTokenInterceptor());
+            optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.AddInterceptors(new AccessTokenInterceptor());
 
-        return new ResumeManagerDbContext(optionsBuilder.Options);
+            return new ResumeManagerDbContext(optionsBuilder.Options);
+        }
     }
 }
