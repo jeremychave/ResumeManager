@@ -146,12 +146,16 @@ jobs:
           dotnet ef dbcontext info --verbose
 
       - name: Apply EF Core migrations
-        env:
-          SQL_ACCESS_TOKEN: ${{ steps.aad-token.outputs.token }}
-          ConnectionStrings__ResumeManagerDb: "Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
         run: |
+          export ConnectionStrings__ResumeManagerDb="Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+          export SQL_ACCESS_TOKEN="${{ steps.aad-token.outputs.token }}"
           cd ResumeManagerWebApi
+          echo "CS: $ConnectionStrings__ResumeManagerDb"
           dotnet ef database update
+        # env:
+        #   SQL_ACCESS_TOKEN: ${{ steps.aad-token.outputs.token }}
+        #   ConnectionStrings__ResumeManagerDb: "Server=tcp:resumemanager-sql.database.windows.net,1433;Initial Catalog=resumemanagerdb;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+        
 
   deploy:
     runs-on: ubuntu-latest
