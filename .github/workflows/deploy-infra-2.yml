@@ -19,8 +19,7 @@ jobs:
     outputs:
       sql_server_name: ${{ steps.get-deployment-outputs.outputs.SQL_SERVER_NAME }}
       sql_database_name: ${{ steps.get-deployment-outputs.outputs.SQL_DATABASE_NAME }}
-      identity_name: ${{ steps.get-deployment-outputs.outputs.IDENTITY_NAME }}
-      identity_object_id: ${{ steps.get-deployment-outputs.outputs.IDENTITY_OBJECT_ID }}
+      api_object_id: ${{ steps.get-deployment-outputs.outputs.API_OBJECT_ID }}
 
     steps:
     - name: Checkout repository
@@ -51,8 +50,7 @@ jobs:
 
         echo "SQL_SERVER_NAME=$(jq -r '.sqlServerName.value' outputs.json)" >> $GITHUB_OUTPUT
         echo "SQL_DATABASE_NAME=$(jq -r '.sqlDatabaseName.value' outputs.json)" >> $GITHUB_OUTPUT
-        echo "IDENTITY_NAME=$(jq -r '.identityName.value' outputs.json)" >> $GITHUB_OUTPUT
-        echo "IDENTITY_OBJECT_ID=$(jq -r '.identityObjectId.value' outputs.json)" >> $GITHUB_OUTPUT
+        echo "API_OBJECT_ID=$(jq -r '.apiObjectId.value' outputs.json)" >> $GITHUB_OUTPUT
 
   create-sql-user:
     runs-on: windows-latest
@@ -71,61 +69,34 @@ jobs:
       shell: powershell
       run: Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
 
-    - name: Debug identity objectId
-      run: |
-        $identityObjectId = "${{ needs.deploy-infra.outputs.identity_object_id }}"
-        $sid = $identityObjectId.Replace('-', '')
-        echo "identityObjectId = ${{ needs.deploy-infra.outputs.identity_object_id }}"
-        echo "identityObjectId (variable) = $identityObjectId"
-        echo "sid = $sid"
-        echo "0xsid = 0x$sid"
-
     - name: Create AAD SQL User
       shell: powershell
       run: |
         $server = "${{ needs.deploy-infra.outputs.sql_server_name }}"
         $database = "${{ needs.deploy-infra.outputs.sql_database_name }}"
-        $identityName = "${{ needs.deploy-infra.outputs.identity_name }}"
-        $identityObjectId = "${{ needs.deploy-infra.outputs.identity_object_id }}"
+        $apiObjectId = "${{ needs.deploy-infra.outputs.api_object_id }}"
 
         Write-Host "Getting AAD token..."
         $token = (Get-AzAccessToken -ResourceUrl "https://database.windows.net").Token
 
-        $ready = $false
-        for ($i = 0; $i -lt 20; $i++) {
-            try {
-                Invoke-Sqlcmd -ServerInstance "$server.database.windows.net" -Database master -AccessToken $token -Query "SELECT 1"
-                $ready = $true
-                break
-            } catch {
-                Write-Host "SQL AAD admin not ready yet. Retrying..."
-                Start-Sleep -Seconds 10
-            }
-        }
-        
-        if (-not $ready) {
-            throw "SQL AAD admin never became ready."
-        }
-
-
-        $sid = $identityObjectId.Replace('-', '')
+        $sid = $apiObjectId.Replace('-', '')
 
         Write-Host "Executing SQL..."
         $sqlMaster = "
-          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityObjectId')
+          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$apiObjectId')
           BEGIN
-              CREATE USER [$identityObjectId] WITH SID = 0x$sid, TYPE = E;
+              CREATE USER [$apiObjectId] WITH SID = 0x$sid, TYPE = E;
           END;
         "
         $sqlDatabase = "
-          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$identityObjectId')
+          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$apiObjectId')
           BEGIN
-              CREATE USER [$identityObjectId] WITH SID = 0x$sid, TYPE = E;
+              CREATE USER [$apiObjectId] WITH SID = 0x$sid, TYPE = E;
           END;
 
-          ALTER ROLE db_datareader ADD MEMBER [$identityObjectId];
-          ALTER ROLE db_datawriter ADD MEMBER [$identityObjectId];
-          ALTER ROLE db_ddladmin ADD MEMBER [$identityObjectId];
+          ALTER ROLE db_datareader ADD MEMBER [$apiObjectId];
+          ALTER ROLE db_datawriter ADD MEMBER [$apiObjectId];
+          ALTER ROLE db_ddladmin ADD MEMBER [$apiObjectId];
         "
 
         # 1. MASTER

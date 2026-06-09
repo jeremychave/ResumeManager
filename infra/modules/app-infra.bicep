@@ -300,19 +300,6 @@ resource apiIdentityWebSiteContributor 'Microsoft.Authorization/roleAssignments@
   }
 }
 
-resource dbIdentitySqlDbContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(identityGitHubAction.name, 'sql-db-contributor')
-  scope: sqlServer
-  properties: {
-    roleDefinitionId: subscriptionResourceId(
-      'Microsoft.Authorization/roleDefinitions',
-      '9b7fa17d-e63e-47b0-bb0a-15c516ac86ec' // SQL DB Contributor
-    )
-    principalId: identityGitHubAction.properties.principalId
-  }
-}
-
 output sqlServerName string = sqlServer.name
 output sqlDatabaseName string = sqlDb.outputs.dbName
-output identityName string = identityGitHubAction.name
-output identityObjectId string = identityGitHubAction.properties.principalId
+output apiObjectId string = webApi.identity.principalId
